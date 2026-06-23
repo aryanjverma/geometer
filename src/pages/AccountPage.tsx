@@ -1,0 +1,108 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { updateProfile } from 'firebase/auth';
+import { useAuth } from '@/contexts/AuthContext';
+import { useProgress } from '@/contexts/ProgressContext';
+
+const AVATAR_OPTIONS = ['🟣', '🔵', '🟢', '🟡', '🔴', '⭐', '📐', '🎯'];
+
+export function AccountPage() {
+  const { user, logOut, deleteAccount } = useAuth();
+  const { profile, updateProfile: saveProfile, wipeUserData } = useProgress();
+  const navigate = useNavigate();
+
+  const [name, setName] = useState('');
+  const [avatar, setAvatar] = useState('📐');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    setName(profile?.displayName ?? user?.displayName ?? '');
+    setAvatar(profile?.photoURL?.startsWith('emoji:') ? profile.photoURL.slice(6) : '📐');
+  }, [profile, user]);
+
+  const handleSave = async () => {
+    if (!user) return;
+    await updateProfile(user, { displayName: name });
+    await saveProfile({ displayName: name, photoURL: `emoji:${avatar}` });
+    setMessage('Profile saved.');
+  };
+
+  const handleLogout = async () => {
+    await logOut();
+    navigate('/login');
+  };
+
+  const handleDelete = async () => {
+    await wipeUserData();
+    await deleteAccount();
+    navigate('/login');
+  };
+
+  return (
+    <div className="page account-page">
+      <h1>Account</h1>
+
+      <div className="avatar-preview" aria-hidden="true">
+        {avatar}
+      </div>
+
+      <label className="field">
+        <span>Display name</span>
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="text-input"
+        />
+      </label>
+
+      <fieldset className="avatar-picker">
+        <legend>Profile picture</legend>
+        <div className="avatar-grid">
+          {AVATAR_OPTIONS.map((emoji) => (
+            <button
+              key={emoji}
+              type="button"
+              className={`avatar-option ${avatar === emoji ? 'selected' : ''}`}
+              onClick={() => setAvatar(emoji)}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      </fieldset>
+
+      <button type="button" className="btn btn-primary" onClick={handleSave}>
+        Save profile
+      </button>
+      {message && <p className="feedback feedback-correct">{message}</p>}
+
+      <hr className="divider" />
+
+      <button type="button" className="btn btn-secondary" onClick={handleLogout}>
+        Log out
+      </button>
+
+      {!showDeleteConfirm ? (
+        <button type="button" className="btn btn-danger" onClick={() => setShowDeleteConfirm(true)}>
+          Delete account
+        </button>
+      ) : (
+        <div className="delete-confirm">
+          <p className="feedback feedback-wrong">
+            This permanently deletes your account and all progress. This cannot be undone.
+          </p>
+          <div className="confirm-actions">
+            <button type="button" className="btn btn-danger" onClick={handleDelete}>
+              Yes, delete my account
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirm(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
