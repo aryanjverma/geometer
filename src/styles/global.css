@@ -523,6 +523,12 @@ a {
   line-height: 1;
 }
 
+.transition-avatar {
+  width: 72px;
+  height: 72px;
+  margin: 0.25rem 0;
+}
+
 .transition-message {
   font-size: 1.125rem;
   font-weight: 600;

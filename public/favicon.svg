@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Geometer">
+  <title>Geometer</title>
+  <rect x="6" y="8" width="52" height="48" rx="10" fill="#6366f1" fill-opacity="0.12" stroke="#6366f1" stroke-width="2.5" />
+  <circle cx="24" cy="27" r="4" fill="#6366f1" />
+  <circle cx="40" cy="27" r="4" fill="#6366f1" />
+  <polygon points="22,38 42,38 32,48" fill="#6366f1" fill-opacity="0.18" stroke="#6366f1" stroke-width="2" stroke-linejoin="round" />
+</svg>
