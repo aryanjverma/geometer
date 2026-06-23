@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/data/profile {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(['displayName', 'photoURL'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 100
+        && request.resource.data.photoURL is string
+        && request.resource.data.photoURL.size() <= 300;
+    }
+
+    match /users/{userId}/data/progress {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly(['lessonProgress'])
+        && request.resource.data.lessonProgress is map
+        && request.resource.data.lessonProgress.size() <= 500;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

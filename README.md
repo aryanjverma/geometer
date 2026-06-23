@@ -21,17 +21,13 @@ npm install
 - Create a **Firestore** database
 - Register a web app and copy config values into `.env` (see `.env.example`)
 
-3. **Firestore rules** (development — tighten for production):
+3. **Firestore rules**
 
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{userId}/data/{doc} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-  }
-}
+Rules live in `firestore.rules` (config in `firebase.json`). They enforce
+per-user ownership plus field/type/size validation. Deploy them with:
+
+```bash
+npx firebase deploy --only firestore:rules
 ```
 
 4. **Run locally**

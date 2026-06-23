@@ -35,7 +35,7 @@ export default function App() {
             </Route>
 
             <Route
-              path="/lesson/right-triangles"
+              path="/lesson/:lessonId"
               element={
                 <ProtectedRoute>
                   <LessonPage />

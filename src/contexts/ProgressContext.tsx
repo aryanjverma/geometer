@@ -14,25 +14,23 @@ import {
   subscribeProgress,
   updateLessonProgress,
   deleteUserData,
-  getLessonProgress,
+  resetProgress as resetProgressService,
 } from '@/services/progressService';
 import {
   emptyProgress,
-  type LessonProgress,
   type UserProfile,
   type UserProgress,
-  LESSON_ID,
 } from '@/types/progress';
 
 interface ProgressContextValue {
   progress: UserProgress;
   profile: UserProfile | null;
   loading: boolean;
-  setStep: (step: number) => Promise<void>;
-  completeLesson: () => Promise<void>;
+  setStep: (lessonId: string, step: number) => Promise<void>;
+  completeLesson: (lessonId: string) => Promise<void>;
   updateProfile: (profile: UserProfile) => Promise<void>;
+  resetProgress: () => Promise<void>;
   wipeUserData: () => Promise<void>;
-  lessonProgress: LessonProgress;
 }
 
 const ProgressContext = createContext<ProgressContextValue | null>(null);
@@ -52,15 +50,37 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     }
 
     setLoading(true);
-    const unsub = subscribeProgress(user.uid, setProgress, () => setLoading(false));
-    fetchProfile(user.uid).then(setProfile).finally(() => setLoading(false));
+    let progressReady = false;
+    let profileReady = false;
+    const settle = () => {
+      if (progressReady && profileReady) setLoading(false);
+    };
+    const unsub = subscribeProgress(
+      user.uid,
+      (p) => {
+        setProgress(p);
+        progressReady = true;
+        settle();
+      },
+      () => {
+        progressReady = true;
+        settle();
+      },
+    );
+    fetchProfile(user.uid)
+      .then(setProfile)
+      .catch(() => {})
+      .finally(() => {
+        profileReady = true;
+        settle();
+      });
     return unsub;
   }, [user]);
 
   const setStep = useCallback(
-    async (step: number) => {
+    async (lessonId: string, step: number) => {
       if (!user) return;
-      const next = await updateLessonProgress(user.uid, LESSON_ID, {
+      const next = await updateLessonProgress(user.uid, lessonId, {
         currentStep: step,
       });
       setProgress(next);
@@ -68,14 +88,17 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     [user],
   );
 
-  const completeLesson = useCallback(async () => {
-    if (!user) return;
-    const next = await updateLessonProgress(user.uid, LESSON_ID, {
-      currentStep: 3,
-      completed: true,
-    });
-    setProgress(next);
-  }, [user]);
+  const completeLesson = useCallback(
+    async (lessonId: string) => {
+      if (!user) return;
+      const next = await updateLessonProgress(user.uid, lessonId, {
+        currentStep: 0,
+        completed: true,
+      });
+      setProgress(next);
+    },
+    [user],
+  );
 
   const updateProfile = useCallback(
     async (nextProfile: UserProfile) => {
@@ -86,12 +109,16 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     [user],
   );
 
+  const resetProgress = useCallback(async () => {
+    if (!user) return;
+    await resetProgressService(user.uid);
+    setProgress(emptyProgress());
+  }, [user]);
+
   const wipeUserData = useCallback(async () => {
     if (!user) return;
     await deleteUserData(user.uid);
   }, [user]);
-
-  const lessonProgress = getLessonProgress(progress);
 
   const value = useMemo(
     () => ({
@@ -101,19 +128,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       setStep,
       completeLesson,
       updateProfile,
+      resetProgress,
       wipeUserData,
-      lessonProgress,
     }),
-    [
-      progress,
-      profile,
-      loading,
-      setStep,
-      completeLesson,
-      updateProfile,
-      wipeUserData,
-      lessonProgress,
-    ],
+    [progress, profile, loading, setStep, completeLesson, updateProfile, resetProgress, wipeUserData],
   );
 
   return (

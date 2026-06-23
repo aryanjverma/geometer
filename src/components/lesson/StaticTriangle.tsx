@@ -18,22 +18,30 @@ export function StaticTriangle({
   revealHyp,
   revealHeight,
 }: StaticTriangleProps) {
-  const w = 280;
-  const h = 200;
-  const pad = 40;
-  const scale = Math.min((w - pad * 2) / legs[0], (h - pad * 2) / legs[1]);
-  const legW = legs[0] * scale;
-  const legH = legs[1] * scale;
+  // Draw the longer leg at a fixed length and the other in proportion, so the
+  // viewBox hugs the triangle's true aspect ratio (no wasted space) and the
+  // shape renders as large as possible while keeping its ratio.
+  const unit = 220 / Math.max(legs[0], legs[1]);
+  const legW = legs[0] * unit;
+  const legH = legs[1] * unit;
+
+  // Asymmetric padding leaves just enough room for the side labels.
+  const padL = 42; // height label sits to the left
+  const padR = 42; // hypotenuse label sits to the right
+  const padT = 28;
+  const padB = 34; // base label sits below
+  const w = legW + padL + padR;
+  const h = legH + padT + padB;
 
   // Right-angle corner is the bottom-left; legs go up and to the right.
-  const rx = pad;
-  const ry = h - pad;
+  const rx = padL;
+  const ry = h - padB;
   const tx = rx;
   const ty = ry - legH;
   const cx = rx + legW;
   const cy = ry;
 
-  const m = 13;
+  const m = Math.min(13, legW * 0.45, legH * 0.45);
 
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className="triangle-svg" aria-hidden="true">

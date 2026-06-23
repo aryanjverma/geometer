@@ -15,9 +15,5 @@ export interface UserProfile {
 export const LESSON_ID = 'right-triangles';
 
 export function emptyProgress(): UserProgress {
-  return {
-    lessonProgress: {
-      [LESSON_ID]: { currentStep: 0, completed: false },
-    },
-  };
+  return { lessonProgress: {} };
 }

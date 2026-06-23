@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Stage, Layer, Line, Circle, Text } from 'react-konva';
 import type { KonvaEventObject } from 'konva/lib/Node';
 import type { Vector2d } from 'konva/lib/types';
@@ -28,6 +28,23 @@ export function InteractiveUnfold({
 }: InteractiveUnfoldProps) {
   const [{ angle2, angle3 }, setAngles] = useState(() => initialAngles(lengths));
 
+  // Scale the fixed-design stage (STAGE_W × STAGE_H) to fill the available width
+  // while preserving its aspect ratio, so it grows/shrinks to fit any screen.
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [display, setDisplay] = useState(1);
+
+  useLayoutEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const apply = (width: number) => {
+      if (width > 0) setDisplay(width / STAGE_W);
+    };
+    apply(el.clientWidth);
+    const ro = new ResizeObserver((entries) => apply(entries[0].contentRect.width));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const scale = useMemo(() => computeScale(lengths), [lengths]);
 
   const points = useMemo(
@@ -48,18 +65,24 @@ export function InteractiveUnfold({
   const radius2 = lengths[1] * scale;
   const radius3 = lengths[2] * scale;
 
+  // dragBoundFunc works in absolute stage pixels, so convert the logical pivot
+  // and radius by the current display scale.
   // Keep the joint (p2) on a fixed-radius circle around the bottom-right pivot (p1).
   const boundJoint = (pos: Vector2d): Vector2d => {
-    const pivot = points[1];
-    const a = Math.atan2(pos.y - pivot[1], pos.x - pivot[0]);
-    return { x: pivot[0] + radius2 * Math.cos(a), y: pivot[1] + radius2 * Math.sin(a) };
+    const px = points[1][0] * display;
+    const py = points[1][1] * display;
+    const r = radius2 * display;
+    const a = Math.atan2(pos.y - py, pos.x - px);
+    return { x: px + r * Math.cos(a), y: py + r * Math.sin(a) };
   };
 
   // Keep the free end (p3) on a fixed-radius circle around the joint pivot (p2).
   const boundEnd = (pos: Vector2d): Vector2d => {
-    const pivot = points[2];
-    const a = Math.atan2(pos.y - pivot[1], pos.x - pivot[0]);
-    return { x: pivot[0] + radius3 * Math.cos(a), y: pivot[1] + radius3 * Math.sin(a) };
+    const px = points[2][0] * display;
+    const py = points[2][1] * display;
+    const r = radius3 * display;
+    const a = Math.atan2(pos.y - py, pos.x - px);
+    return { x: px + r * Math.cos(a), y: py + r * Math.sin(a) };
   };
 
   const dragJoint = (e: KonvaEventObject<DragEvent>) => {
@@ -109,8 +132,13 @@ export function InteractiveUnfold({
   })();
 
   return (
-    <div className="interactive-stage-wrap">
-      <Stage width={STAGE_W} height={STAGE_H}>
+    <div className="interactive-stage-wrap" ref={wrapRef}>
+      <Stage
+        width={STAGE_W * display}
+        height={STAGE_H * display}
+        scaleX={display}
+        scaleY={display}
+      >
         <Layer>
           <Line
             points={[p0[0], p0[1], p1[0], p1[1], p2[0], p2[1], p3[0], p3[1]]}
