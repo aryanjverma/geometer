@@ -150,6 +150,7 @@ export function SplitTriangle({
                 text={`base ${base}`}
                 fontSize={14}
                 fontStyle="bold"
+                fontFamily="Space Grotesk"
                 fill="#312e81"
               />
 
@@ -172,6 +173,7 @@ export function SplitTriangle({
                 text="↓"
                 fontSize={16}
                 fontStyle="bold"
+                fontFamily="Space Grotesk"
                 fill="#fff"
                 listening={false}
               />
@@ -194,6 +196,7 @@ export function SplitTriangle({
                   text={baseHalfLabel}
                   fontSize={14}
                   fontStyle="bold"
+                  fontFamily="Space Grotesk"
                   fill="#000"
                 />
                 <Text
@@ -202,6 +205,7 @@ export function SplitTriangle({
                   text={heightLabel}
                   fontSize={14}
                   fontStyle="bold"
+                  fontFamily="Space Grotesk"
                   fill="#000"
                 />
                 <Text
@@ -210,6 +214,7 @@ export function SplitTriangle({
                   text={sideLabel}
                   fontSize={13}
                   fontStyle="bold"
+                  fontFamily="Space Grotesk"
                   fill="#000"
                 />
               </Group>
@@ -229,6 +234,7 @@ export function SplitTriangle({
                   text={baseHalfLabel}
                   fontSize={14}
                   fontStyle="bold"
+                  fontFamily="Space Grotesk"
                   fill="#000"
                 />
                 <Text
@@ -237,6 +243,7 @@ export function SplitTriangle({
                   text={heightLabel}
                   fontSize={14}
                   fontStyle="bold"
+                  fontFamily="Space Grotesk"
                   fill="#000"
                 />
                 <Text
@@ -245,6 +252,7 @@ export function SplitTriangle({
                   text={sideLabel}
                   fontSize={13}
                   fontStyle="bold"
+                  fontFamily="Space Grotesk"
                   fill="#000"
                 />
               </Group>

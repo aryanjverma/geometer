@@ -5,7 +5,7 @@
 }
 
 :root {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   color: #1e1b4b;
   background: #f8fafc;
@@ -32,6 +32,13 @@ a {
   text-decoration: none;
 }
 
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
 .page {
   padding: 1.25rem 1rem 6rem;
   max-width: 560px;
@@ -42,6 +49,26 @@ a {
 .dashboard-page,
 .account-page {
   text-align: center;
+}
+
+.dashboard-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.brand-wordmark {
+  margin: 0.25rem 0 0;
+  font-size: 2rem;
+  letter-spacing: -0.03em;
+}
+
+.dashboard-greeting {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
 }
 
 .page-center {
@@ -103,6 +130,7 @@ a {
   padding: 0.75rem 1.25rem;
   font-size: 1rem;
   font-weight: 600;
+  font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -188,6 +216,57 @@ a {
 .tagline {
   color: var(--muted);
   margin-bottom: 1.5rem;
+}
+
+.login-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.login-intro .tagline {
+  margin-bottom: 0;
+}
+
+.benefit-list {
+  list-style: none;
+  margin: 1.5rem 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: left;
+}
+
+.benefit-item {
+  position: relative;
+  padding-left: 1.75rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.benefit-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.3rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: var(--primary);
+}
+
+.benefit-item:nth-child(1)::before {
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+
+.benefit-item:nth-child(2)::before {
+  border-radius: 2px;
+}
+
+.benefit-item:nth-child(3)::before {
+  border-radius: 50%;
 }
 
 .progress-wrap {
@@ -466,6 +545,10 @@ a {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   font-size: 1rem;
+}
+
+.answer-input {
+  font-family: 'Roboto', 'Segoe UI', system-ui, sans-serif;
 }
 
 .feedback {
