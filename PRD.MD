@@ -63,6 +63,10 @@ FRs are ordered by **build priority**. Each FR is a checkpoint: complete it, ver
 - `/login` is the only route accessible without authentication
 - All other routes redirect unauthenticated users to `/login`
 - Successful sign-in lands on the dashboard
+- `authDomain` must be the **same origin** that serves the app (the Firebase Hosting
+  domain, e.g. `your-project.web.app`), not `your-project.firebaseapp.com`. A cross-origin
+  auth helper breaks sign-in on mobile/storage-partitioned browsers with the "missing
+  initial state" error. See README → Troubleshooting.
 
 **Out of scope for this FR:** Navigator, dashboard content, lesson content
 
@@ -71,6 +75,7 @@ FRs are ordered by **build priority**. Each FR is a checkpoint: complete it, ver
 - A signed-out user cannot reach `/dashboard`, `/account`, or `/lesson/`*
 - Sign-in with Google completes and redirects to the dashboard
 - Returning authenticated users skip the login page
+- Sign-in succeeds on a mobile browser (no "missing initial state" error)
 
 > **Checkpoint:** Stop here. Verify acceptance criteria before starting FR-2.
 
@@ -428,9 +433,9 @@ Lessons are data-driven JSON — not hard-coded HTML — so new lessons can be a
 | Layer           | Recommendation                                          |
 | --------------- | ------------------------------------------------------- |
 | Frontend        | React + Konva.js for draggable triangle vertices        |
-| Auth            | Firebase Auth — Google OAuth                            |
+| Auth            | Firebase Auth — Google OAuth (`authDomain` must match the hosting origin) |
 | Persistence     | Firestore — user progress and profile                   |
-| Hosting         | Vercel                                                  |
+| Hosting         | Firebase Hosting (`*.web.app`) — keeps app and auth helper same-origin |
 | Math validation | Integer-only answers; exact match (tolerance 0) for MVP |
 
 
