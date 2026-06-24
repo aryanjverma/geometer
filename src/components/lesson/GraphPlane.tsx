@@ -116,6 +116,14 @@ export function GraphPlane({
       ly = my - 8;
     }
 
+    if (seg.labelOffset) {
+      lx = mx + (seg.labelOffset.dx ?? 0);
+      ly = my + (seg.labelOffset.dy ?? 0);
+    }
+    if (seg.labelAnchor) {
+      labelAnchor = seg.labelAnchor;
+    }
+
     return (
       <g key={seg.id}>
         <line

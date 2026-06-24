@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { getLessonMeta } from '@/content/lessons';
 import { useProgress } from '@/contexts/ProgressContext';
@@ -5,10 +6,14 @@ import { getLessonProgress, isLessonLocked } from '@/services/progressService';
 import { ProgressBar } from '@/components/dashboard/ProgressBar';
 import { StepRenderer } from './StepRenderer';
 
+/** How long the bar lingers at 100% before navigating to the dashboard. */
+const FINISH_DELAY_MS = 1000;
+
 export function LessonView() {
   const { lessonId = '' } = useParams();
   const navigate = useNavigate();
   const { progress, loading, setStep, completeLesson } = useProgress();
+  const [finishing, setFinishing] = useState(false);
 
   const meta = getLessonMeta(lessonId);
 
@@ -31,16 +36,21 @@ export function LessonView() {
   const currentIndex = Math.min(lessonProgress.currentStep, steps.length - 1);
   const step = steps[currentIndex];
   const isLast = currentIndex === steps.length - 1;
-  const percent = Math.round((currentIndex / steps.length) * 100);
+  const percent = finishing
+    ? 100
+    : Math.round((currentIndex / steps.length) * 100);
 
   const handleCorrect = async () => {
     if (isLast) {
-      if (!completed) {
-        await completeLesson(lessonId);
-      } else {
-        await setStep(lessonId, 0);
-      }
-      navigate('/dashboard');
+      setFinishing(true);
+      setTimeout(async () => {
+        if (!completed) {
+          await completeLesson(lessonId);
+        } else {
+          await setStep(lessonId, 0);
+        }
+        navigate('/dashboard');
+      }, FINISH_DELAY_MS);
       return;
     }
     await setStep(lessonId, currentIndex + 1);

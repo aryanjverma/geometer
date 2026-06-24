@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { DistanceSubStep, GuidedInput, LessonStep } from '@/types/lesson';
 import { GraphPlane } from './GraphPlane';
 import { Confetti } from './Confetti';
+import { MathText } from '@/components/MathText';
 
 interface FeedbackState {
   message: string;
@@ -136,7 +137,7 @@ export function DistanceProblemStep({ step, onCorrect }: DistanceProblemStepProp
       {celebrate && <Confetti />}
       <div className="question-box">
         <span className={`step-tag ${TAG_CLASS[tag]}`}>{tag}</span>
-        <p className="step-prompt">{sub.prompt}</p>
+        <p className="step-prompt"><MathText>{sub.prompt}</MathText></p>
         {graph && (
           <GraphPlane
             points={graph.points}
@@ -159,7 +160,7 @@ export function DistanceProblemStep({ step, onCorrect }: DistanceProblemStepProp
                 className="btn btn-secondary choice-btn"
                 onClick={() => handleChoice(choice.id)}
               >
-                {choice.label}
+                <MathText>{choice.label}</MathText>
               </button>
             ))}
           </div>
@@ -190,7 +191,11 @@ export function DistanceProblemStep({ step, onCorrect }: DistanceProblemStepProp
             </button>
           </form>
         )}
-        {feedback && <p className={`feedback feedback-${feedback.variant}`}>{feedback.message}</p>}
+        {feedback && (
+          <p className={`feedback feedback-${feedback.variant}`}>
+            <MathText>{feedback.message}</MathText>
+          </p>
+        )}
       </div>
     </div>
   );

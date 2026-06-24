@@ -3,6 +3,8 @@ import type { LessonStep } from '@/types/lesson';
 import { StaticTriangle } from './StaticTriangle';
 import { GeneralTriangle } from './GeneralTriangle';
 import { ShearTriangle } from './ShearTriangle';
+import { WhyHalfParallelogram } from './WhyHalfParallelogram';
+import { MathText } from '@/components/MathText';
 
 interface DemonstrationStepProps {
   step: LessonStep;
@@ -26,6 +28,9 @@ export function DemonstrationStep({ step, onCorrect }: DemonstrationStepProps) {
           showArea={revealedCount >= 2}
         />
       );
+    }
+    if (demo?.interactive === 'parallelogram' && triangle && 'base' in triangle) {
+      return <WhyHalfParallelogram base={triangle.base} height={triangle.height} />;
     }
     if (triangle && 'legs' in triangle) {
       const { legs, hypotenuse } = triangle;
@@ -58,8 +63,12 @@ export function DemonstrationStep({ step, onCorrect }: DemonstrationStepProps) {
     <div className="step-area">
       <div className="question-box">
         <span className="step-tag step-tag-ido">I do</span>
-        <p className="step-prompt">{step.prompt}</p>
-        {demo?.intro && <p className="muted demo-intro">{demo.intro}</p>}
+        <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
+        {demo?.intro && (
+          <p className="muted demo-intro">
+            <MathText>{demo.intro}</MathText>
+          </p>
+        )}
         {renderVisual()}
       </div>
 
@@ -73,11 +82,15 @@ export function DemonstrationStep({ step, onCorrect }: DemonstrationStepProps) {
                 className={`demo-reveal ${shown ? 'demo-reveal-shown' : 'demo-reveal-hidden'}`}
                 aria-hidden={!shown}
               >
-                <p className="demo-reveal-label">{reveal.label}</p>
+                <p className="demo-reveal-label"><MathText>{reveal.label}</MathText></p>
                 {shown && (
                   <>
-                    {reveal.formula && <p className="formula-box">{reveal.formula}</p>}
-                    <p className="demo-reveal-body">{reveal.body}</p>
+                    {reveal.formula && (
+                      <p className="formula-box">
+                        <MathText>{reveal.formula}</MathText>
+                      </p>
+                    )}
+                    <p className="demo-reveal-body"><MathText>{reveal.body}</MathText></p>
                   </>
                 )}
               </li>

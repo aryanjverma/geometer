@@ -22,7 +22,7 @@ function profileDoc(uid: string) {
   return doc(db, 'users', uid, 'data', 'profile');
 }
 
-export async function fetchProgress(uid: string): Promise<UserProgress> {
+async function fetchProgress(uid: string): Promise<UserProgress> {
   const snap = await getDoc(progressDoc(uid));
   if (!snap.exists()) return emptyProgress();
   return snap.data() as UserProgress;
@@ -42,7 +42,7 @@ export function subscribeProgress(
   );
 }
 
-export async function saveProgress(uid: string, progress: UserProgress) {
+async function saveProgress(uid: string, progress: UserProgress) {
   await setDoc(progressDoc(uid), progress, { merge: true });
 }
 

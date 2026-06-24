@@ -1,4 +1,4 @@
-export type StepType =
+type StepType =
   | 'interactive-unfold'
   | 'formula-compute'
   | 'numeric'
@@ -15,24 +15,24 @@ export type StepType =
   | 'distance-guided'
   | 'distance-problem';
 
-export interface StepFeedback {
+interface StepFeedback {
   correct?: string;
   wrong?: string;
   hint?: string;
 }
 
-export interface TriangleLegs {
+interface TriangleLegs {
   legs: [number, number];
   hypotenuse?: number;
 }
 
-export interface TrianglePartial {
+interface TrianglePartial {
   leg: number;
   hypotenuse: number;
   missingLeg?: number;
 }
 
-export interface TriangleGeneral {
+interface TriangleGeneral {
   base: number;
   height: number;
   /** Base segment to the left of the altitude foot (for the split visual). */
@@ -43,7 +43,7 @@ export interface TriangleGeneral {
   sides?: [number, number];
 }
 
-export interface MultiPart {
+interface MultiPart {
   id: string;
   prompt: string;
   answer: number;
@@ -51,7 +51,7 @@ export interface MultiPart {
 }
 
 /** A single click-to-reveal step in an "I do" worked demonstration. */
-export interface DemoReveal {
+interface DemoReveal {
   label: string;
   body: string;
   formula?: string;
@@ -79,15 +79,15 @@ export interface GuidedPart {
   feedback?: StepFeedback;
 }
 
-export interface DemoContent {
+interface DemoContent {
   intro?: string;
   reveals: DemoReveal[];
   /** Optional embedded interactive widget. */
-  interactive?: 'shear';
+  interactive?: 'shear' | 'parallelogram';
 }
 
 /** A full-slide transition message shown between lesson phases. */
-export interface TransitionContent {
+interface TransitionContent {
   emoji: string;
   /** Button label; defaults to "Continue". */
   cta?: string;
@@ -115,16 +115,20 @@ export interface GraphSegment {
   to: string;
   label?: string;
   kind?: 'dx' | 'dy' | 'dist';
+  /** Pixel nudge of the label from the segment midpoint. Overrides the default placement. */
+  labelOffset?: { dx?: number; dy?: number };
+  /** Text anchor for the label. Used together with labelOffset. */
+  labelAnchor?: 'start' | 'middle' | 'end';
 }
 
 /** Points and segments rendered on a GraphPlane. The viewBox auto-fits the points. */
-export interface GraphContent {
+interface GraphContent {
   points: GraphPoint[];
   segments: GraphSegment[];
 }
 
 /** A single multiple-choice option for a distance sub-step. */
-export interface DistanceChoice {
+interface DistanceChoice {
   id: string;
   label: string;
 }

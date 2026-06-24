@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Stage, Layer, Line, Circle, Text } from 'react-konva';
 import type { Vector2d } from 'konva/lib/types';
+import { MathText } from '@/components/MathText';
 
 const STAGE_W = 360;
 const STAGE_H = 250;
@@ -8,6 +9,8 @@ const BASE_Y = 190;
 const TOP_PAD = 40;
 /** Fraction of the remaining distance the apex eases each frame (lower = slower/smoother). */
 const EASE = 0.12;
+/** Side length (lesson px) of the right-angle marker square at the altitude foot. */
+const RA_MARKER = 12;
 
 interface ShearTriangleProps {
   /** Base length in lesson units. */
@@ -46,8 +49,11 @@ export function ShearTriangle({ base, height, showArea = true }: ShearTrianglePr
 
   const apexY = BASE_Y - height * unit;
 
-  const minX = baseLeftX - bw * 0.75;
-  const maxX = baseLeftX + bw * 1.75;
+  // Constrain the apex to ~90% of the stage width, centered, so it never
+  // slides off screen no matter how wide the base is.
+  const TRAVEL_SPAN = 0.9;
+  const minX = STAGE_W / 2 - (STAGE_W * TRAVEL_SPAN) / 2;
+  const maxX = STAGE_W / 2 + (STAGE_W * TRAVEL_SPAN) / 2;
 
   // The apex eases toward the pointer target instead of snapping, so the motion
   // reads as a slow, smooth slide rather than a jumpy drag.
@@ -95,6 +101,10 @@ export function ShearTriangle({ base, height, showArea = true }: ShearTrianglePr
 
   const area = (base * height) / 2;
 
+  // Draw the right-angle marker toward stage center: when the apex is on the
+  // left half, open it to the right of the altitude, and vice versa.
+  const raDir = apex[0] < STAGE_W / 2 ? 1 : -1;
+
   return (
     <div className="interactive-stage-wrap" ref={wrapRef}>
       <Stage
@@ -112,6 +122,15 @@ export function ShearTriangle({ base, height, showArea = true }: ShearTrianglePr
             dash={[4, 4]}
           />
 
+          {/* Horizontal line along the base level, parallel to the apex line.
+              Together they bound the constant-height band the apex slides within. */}
+          <Line
+            points={[minX, BASE_Y, maxX, BASE_Y]}
+            stroke="#cbd5e1"
+            strokeWidth={1.5}
+            dash={[4, 4]}
+          />
+
           <Line
             points={[bl[0], bl[1], apex[0], apex[1], br[0], br[1]]}
             closed
@@ -121,12 +140,28 @@ export function ShearTriangle({ base, height, showArea = true }: ShearTrianglePr
             lineJoin="round"
           />
 
-          {/* Altitude (height) from apex straight down to the base line. */}
+          {/* Altitude (height) from apex perpendicularly down to the base line. */}
           <Line
             points={[apex[0], apex[1], foot[0], foot[1]]}
             stroke="#6366f1"
             strokeWidth={1.5}
             dash={[5, 4]}
+          />
+
+          {/* Right-angle marker at the foot of the altitude, signalling that the
+              height is perpendicular to the base. Two Konva segments form the
+              open corner of a small square (mirrors GeneralTriangle's marker). */}
+          <Line
+            points={[
+              foot[0] + raDir * RA_MARKER,
+              foot[1],
+              foot[0] + raDir * RA_MARKER,
+              foot[1] - RA_MARKER,
+              foot[0],
+              foot[1] - RA_MARKER,
+            ]}
+            stroke="#6366f1"
+            strokeWidth={1.5}
           />
 
           {/* Base bracket. */}
@@ -170,10 +205,15 @@ export function ShearTriangle({ base, height, showArea = true }: ShearTrianglePr
       </Stage>
 
       <div className="shear-readout">
+        <span className="shear-formula">
+          <MathText>{'Area $= \\frac{1}{2}bh$'}</MathText>
+        </span>
         <span>base = {base}</span>
         <span>height = {height}</span>
         {showArea && (
-          <span className="shear-area">area = ½ × {base} × {height} = {area}</span>
+          <span className="shear-area">
+            <MathText>{`area $= \\frac{1}{2} \\times ${base} \\times ${height} = ${area}$`}</MathText>
+          </span>
         )}
       </div>
     </div>

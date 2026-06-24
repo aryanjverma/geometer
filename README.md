@@ -2,7 +2,7 @@
 
 **Subject:** Geometry — right triangles (area, perimeter, Pythagorean theorem)  
 **Audience:** 8th graders  
-**Stack:** React, TypeScript, Vite, Firebase (Auth + Firestore), Konva, Vercel
+**Stack:** React, TypeScript, Vite, Firebase (Auth + Firestore + Hosting), Konva
 
 Interactive learn-by-doing geometry app modeled on Brilliant. Phase 1 — no AI.
 
@@ -40,10 +40,11 @@ npx firebase deploy --only firestore:rules
 npm run dev
 ```
 
-5. **Deploy to Vercel**
+5. **Deploy to Firebase Hosting**
 
-- Import repo, add the same `VITE_FIREBASE_*` env vars, deploy
-- Add your deployment domain to Firebase Auth → Authorized domains
+- Build the app: `npm run build` (outputs to `dist/`, the `public` dir in `firebase.json`)
+- Deploy: `npx firebase deploy --only hosting`
+- Confirm your `*.web.app` domain is listed under Firebase Auth → Authorized domains
 
 ## Troubleshooting
 
@@ -94,7 +95,7 @@ src/
 | FR-4 | Right triangle lesson — 4 interactive steps |
 | FR-5 | Account — name, avatar, logout, delete |
 | FR-6 | Firestore progress persistence |
-| FR-7 | Mobile-responsive layout + Vercel deploy config |
+| FR-7 | Mobile-responsive layout + Firebase Hosting deploy config |
 
 ## Lesson steps
 

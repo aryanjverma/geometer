@@ -1,5 +1,6 @@
 import type { LessonStep } from '@/types/lesson';
 import { GeometerAvatar } from '@/components/GeometerAvatar';
+import { MathText } from '@/components/MathText';
 
 interface TransitionStepProps {
   step: LessonStep;
@@ -18,7 +19,7 @@ export function TransitionStep({ step, onCorrect }: TransitionStepProps) {
             {transition.emoji}
           </span>
         )}
-        <p className="transition-message">{step.prompt}</p>
+        <p className="transition-message"><MathText>{step.prompt}</MathText></p>
         <GeometerAvatar className="transition-avatar" />
         <button type="button" className="btn btn-primary" onClick={onCorrect}>
           {cta}

@@ -10,6 +10,7 @@ import { GuidedStep } from './GuidedStep';
 import { TransitionStep } from './TransitionStep';
 import { DistanceDemoStep } from './DistanceDemoStep';
 import { DistanceProblemStep } from './DistanceProblemStep';
+import { MathText } from '@/components/MathText';
 
 interface FeedbackState {
   message: string;
@@ -17,7 +18,11 @@ interface FeedbackState {
 }
 
 function AnswerFeedback({ message, variant }: FeedbackState) {
-  return <p className={`feedback feedback-${variant}`}>{message}</p>;
+  return (
+    <p className={`feedback feedback-${variant}`}>
+      <MathText>{message}</MathText>
+    </p>
+  );
 }
 
 interface NumericInputProps {
@@ -121,7 +126,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
       <div className="step-area">
         {celebrate && <Confetti />}
         <div className="question-box">
-          <p className="step-prompt">{step.prompt}</p>
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
           <InteractiveUnfold
             lengths={lengths}
             labels={[String(legs[0]), String(legs[1]), String(hypotenuse)]}
@@ -153,8 +158,12 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
       <div className="step-area">
         {celebrate && <Confetti />}
         <div className="question-box">
-          {step.formula && <p className="formula-box">{step.formula}</p>}
-          <p className="step-prompt">{step.prompt}</p>
+          {step.formula && (
+            <p className="formula-box">
+              <MathText>{step.formula}</MathText>
+            </p>
+          )}
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
           <StaticTriangle legs={legs} baseLabel={legs[0]} heightLabel={legs[1]} />
         </div>
         <div className="answer-box">
@@ -185,7 +194,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
       <div className="step-area">
         {celebrate && <Confetti />}
         <div className="question-box">
-          <p className="step-prompt">{step.prompt}</p>
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
           <StaticTriangle
             legs={legs}
             baseLabel={legs[0]}
@@ -221,7 +230,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
         {!partADone ? (
           <>
             <div className="question-box">
-              <p className="step-prompt">{partA?.prompt}</p>
+              <p className="step-prompt"><MathText>{partA?.prompt ?? ''}</MathText></p>
               <StaticTriangle
                 legs={[leg, missingLeg]}
                 baseLabel={leg}
@@ -250,7 +259,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
         ) : (
           <>
             <div className="question-box">
-              <p className="step-prompt">{partB?.prompt}</p>
+              <p className="step-prompt"><MathText>{partB?.prompt ?? ''}</MathText></p>
               <InteractiveUnfold
                 lengths={lengths}
                 labels={[String(leg), String(missingLeg), String(hypotenuse)]}
@@ -289,7 +298,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
       <div className="step-area">
         {celebrate && <Confetti />}
         <div className="question-box">
-          <p className="step-prompt">{partADone ? partB?.prompt : partA?.prompt}</p>
+          <p className="step-prompt"><MathText>{(partADone ? partB?.prompt : partA?.prompt) ?? ''}</MathText></p>
           <StaticTriangle
             legs={[leg, 6]}
             baseLabel={leg}
@@ -336,8 +345,12 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
       <div className="step-area">
         {celebrate && <Confetti />}
         <div className="question-box">
-          {step.formula && <p className="formula-box">{step.formula}</p>}
-          <p className="step-prompt">{step.prompt}</p>
+          {step.formula && (
+            <p className="formula-box">
+              <MathText>{step.formula}</MathText>
+            </p>
+          )}
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
           <GeneralTriangle
             base={base}
             height={height}
@@ -373,7 +386,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
       <div className="step-area">
         {celebrate && <Confetti />}
         <div className="question-box">
-          <p className="step-prompt">{step.prompt}</p>
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
           <GeneralTriangle
             base={base}
             height={height}
@@ -406,7 +419,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
       <div className="step-area">
         {celebrate && <Confetti />}
         <div className="question-box">
-          <p className="step-prompt">{step.prompt}</p>
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
           <SplitTriangle
             base={base}
             height={height}
@@ -440,7 +453,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
       <div className="step-area">
         {celebrate && <Confetti />}
         <div className="question-box">
-          <p className="step-prompt">{step.prompt}</p>
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
           <GeneralTriangle
             base={base}
             height={height}

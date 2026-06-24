@@ -3,6 +3,7 @@ import type { GuidedPart, LessonStep } from '@/types/lesson';
 import { StaticTriangle } from './StaticTriangle';
 import { GeneralTriangle } from './GeneralTriangle';
 import { Confetti } from './Confetti';
+import { MathText } from '@/components/MathText';
 
 interface FeedbackState {
   message: string;
@@ -110,7 +111,7 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
       {celebrate && <Confetti />}
       <div className="question-box">
         <span className="step-tag step-tag-wedo">We do</span>
-        <p className="step-prompt">{part.prompt}</p>
+        <p className="step-prompt"><MathText>{part.prompt}</MathText></p>
         {renderVisual()}
       </div>
 
@@ -140,7 +141,11 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
             Check
           </button>
         </form>
-        {feedback && <p className={`feedback feedback-${feedback.variant}`}>{feedback.message}</p>}
+        {feedback && (
+          <p className={`feedback feedback-${feedback.variant}`}>
+            <MathText>{feedback.message}</MathText>
+          </p>
+        )}
       </div>
     </div>
   );

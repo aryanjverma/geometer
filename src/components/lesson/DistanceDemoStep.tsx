@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { LessonStep } from '@/types/lesson';
 import { GraphPlane } from './GraphPlane';
+import { MathText } from '@/components/MathText';
 
 interface DistanceDemoStepProps {
   step: LessonStep;
@@ -30,8 +31,12 @@ export function DistanceDemoStep({ step, onCorrect }: DistanceDemoStepProps) {
     <div className="step-area">
       <div className="question-box">
         <span className="step-tag step-tag-ido">I do</span>
-        <p className="step-prompt">{step.prompt}</p>
-        {demo?.intro && <p className="muted demo-intro">{demo.intro}</p>}
+        <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
+        {demo?.intro && (
+          <p className="muted demo-intro">
+            <MathText>{demo.intro}</MathText>
+          </p>
+        )}
         {graph && (
           <GraphPlane
             points={graph.points}
@@ -51,11 +56,15 @@ export function DistanceDemoStep({ step, onCorrect }: DistanceDemoStepProps) {
                 className={`demo-reveal ${shown ? 'demo-reveal-shown' : 'demo-reveal-hidden'}`}
                 aria-hidden={!shown}
               >
-                <p className="demo-reveal-label">{reveal.label}</p>
+                <p className="demo-reveal-label"><MathText>{reveal.label}</MathText></p>
                 {shown && (
                   <>
-                    {reveal.formula && <p className="formula-box">{reveal.formula}</p>}
-                    <p className="demo-reveal-body">{reveal.body}</p>
+                    {reveal.formula && (
+                      <p className="formula-box">
+                        <MathText>{reveal.formula}</MathText>
+                      </p>
+                    )}
+                    <p className="demo-reveal-body"><MathText>{reveal.body}</MathText></p>
                   </>
                 )}
               </li>

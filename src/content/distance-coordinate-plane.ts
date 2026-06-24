@@ -30,19 +30,19 @@ export const distanceLesson: Lesson = {
         intro: 'Reveal each step in order to watch the right triangle build itself on the grid.',
         reveals: [
           {
-            label: 'Step 1 \u2014 Find \u0394x and \u0394y',
-            body: '\u0394x is the change in x from one point to the other: 5 \u2212 1 = 4. \u0394y is the change in y: 5 \u2212 2 = 3. These two changes form the legs of a right triangle.',
+            label: 'Step 1 \u2014 Find $\\Delta x$ and $\\Delta y$',
+            body: '$\\Delta x$ is the change in $x$ from one point to the other: $5 - 1 = 4$. $\\Delta y$ is the change in $y$: $5 - 2 = 3$. These two changes form the legs of a right triangle.',
             drawSegmentIds: ['dx', 'dy'],
           },
           {
-            label: 'Step 2 \u2014 Plug them into the formula',
-            formula: '\u0394x\u00b2 + \u0394y\u00b2 = D\u00b2',
-            body: 'The distance D is the hypotenuse of that right triangle, so substitute the legs: 4\u00b2 + 3\u00b2 = D\u00b2.',
+            label: 'Step 2 \u2014 Substitute them into the formula',
+            formula: '$\\Delta x^2 + \\Delta y^2 = D^2$',
+            body: 'The distance $D$ is the hypotenuse of that right triangle, so substitute the legs: $4^2 + 3^2 = D^2$.',
           },
           {
-            label: 'Step 3 \u2014 Solve for D',
-            formula: 'D = \u221a(\u0394x\u00b2 + \u0394y\u00b2) = \u221a(16 + 9) = \u221a25 = 5',
-            body: 'Square each leg, add them to get D\u00b2 = 25, then take the square root: D = 5.',
+            label: 'Step 3 \u2014 Solve for $D$',
+            formula: '$D = \\sqrt{\\Delta x^2 + \\Delta y^2} = \\sqrt{16 + 9} = \\sqrt{25} = 5$',
+            body: 'Square each leg, add them to obtain $D^2 = 25$, then take the square root: $D = 5$.',
             drawSegmentIds: ['dist'],
           },
         ],
@@ -74,37 +74,37 @@ export const distanceLesson: Lesson = {
         {
           id: 'deltas',
           kind: 'multi',
-          prompt: 'First, find \u0394x and \u0394y \u2014 the change in x and the change in y between C and D.',
+          prompt: 'First, find $\\Delta x$ and $\\Delta y$ \u2014 the change in $x$ and the change in $y$ between C and D.',
           inputs: [
             { id: 'dx', label: '\u0394x =', answer: 8 },
             { id: 'dy', label: '\u0394y =', answer: 6 },
           ],
           drawSegmentIds: ['dx', 'dy'],
           feedback: {
-            wrong: '\u0394x = 10 \u2212 2 and \u0394y = 7 \u2212 1.',
-            hint: 'Subtract the x-coordinates of the two points for \u0394x, and the y-coordinates for \u0394y.',
+            wrong: '$\\Delta x = 10 - 2$ and $\\Delta y = 7 - 1$.',
+            hint: 'Subtract the $x$-coordinates of the two points for $\\Delta x$, and the $y$-coordinates for $\\Delta y$.',
           },
         },
         {
           id: 'd-squared',
           kind: 'numeric',
-          prompt: 'Plug the legs into \u0394x\u00b2 + \u0394y\u00b2 = D\u00b2. What does D\u00b2 equal?',
+          prompt: 'Substitute the legs into $\\Delta x^2 + \\Delta y^2 = D^2$. What does $D^2$ equal?',
           answer: 100,
           feedback: {
-            wrong: 'Square each leg and add: 8\u00b2 + 6\u00b2.',
-            hint: 'Square each leg, then add the two squares to get D squared.',
+            wrong: 'Square each leg and add: $8^2 + 6^2$.',
+            hint: 'Square each leg, then add the two squares to obtain $D^2$.',
           },
         },
         {
           id: 'd',
           kind: 'numeric',
-          prompt: 'Finally, solve for D by taking the square root of D\u00b2.',
+          prompt: 'Finally, solve for $D$ by taking the square root of $D^2$.',
           answer: 10,
           drawSegmentIds: ['dist'],
           feedback: {
-            correct: '\u221a100 = 10 \u2014 the distance is 10.',
+            correct: '$\\sqrt{100} = 10$ \u2014 the distance is 10.',
             wrong: 'Take the square root of 100.',
-            hint: 'D squared is a square — take its square root to find D.',
+            hint: 'Since $D^2$ is a perfect square, take its square root to find $D$.',
           },
         },
       ],
@@ -139,9 +139,9 @@ export const distanceLesson: Lesson = {
           answer: 13,
           drawSegmentIds: ['dx', 'dy', 'dist'],
           feedback: {
-            correct: '\u0394x = 12, \u0394y = 5, so D = \u221a(12\u00b2 + 5\u00b2) = \u221a169 = 13.',
-            wrong: 'Find \u0394x and \u0394y first, then use D = \u221a(\u0394x\u00b2 + \u0394y\u00b2).',
-            hint: 'Find \u0394x and \u0394y from the coordinates, square each, add them, then take the square root.',
+            correct: '$\\Delta x = 12$, $\\Delta y = 5$, so $D = \\sqrt{12^2 + 5^2} = \\sqrt{169} = 13$.',
+            wrong: 'Find $\\Delta x$ and $\\Delta y$ first, then use $D = \\sqrt{\\Delta x^2 + \\Delta y^2}$.',
+            hint: 'Find $\\Delta x$ and $\\Delta y$ from the coordinates, square each, add them, then take the square root.',
           },
         },
       ],
@@ -153,13 +153,21 @@ export const distanceLesson: Lesson = {
       tag: 'You do',
       graph: {
         points: [
-          { id: 'P', label: 'P (1, 1)', x: 1, y: 1 },
+          { id: 'P', label: 'P (1, 1)', x: 1, y: 1, labelPos: 'br' },
           { id: 'Q', label: 'Q (9, 1)', x: 9, y: 1 },
           { id: 'R', label: 'R (5, 4)', x: 5, y: 4 },
         ],
         segments: [
           { id: 'pq', from: 'P', to: 'Q', kind: 'dist', label: 'PQ = 8' },
-          { id: 'qr', from: 'Q', to: 'R', kind: 'dist', label: 'QR = 5' },
+          {
+            id: 'qr',
+            from: 'Q',
+            to: 'R',
+            kind: 'dist',
+            label: 'QR = 5',
+            labelOffset: { dx: 14, dy: 4 },
+            labelAnchor: 'start',
+          },
           { id: 'rp', from: 'R', to: 'P', kind: 'dist', label: 'RP = 5' },
         ],
       },
@@ -176,7 +184,7 @@ export const distanceLesson: Lesson = {
           ],
           drawSegmentIds: ['pq', 'qr', 'rp'],
           feedback: {
-            wrong: 'Use D = \u221a(\u0394x\u00b2 + \u0394y\u00b2) on each pair of vertices.',
+            wrong: 'Use $D = \\sqrt{\\Delta x^2 + \\Delta y^2}$ on each pair of vertices.',
             hint: 'For each side, find the horizontal and vertical change between its endpoints, then apply the distance formula.',
           },
         },
@@ -223,7 +231,7 @@ export const distanceLesson: Lesson = {
           ],
           drawSegmentIds: ['ab', 'ac', 'bc'],
           feedback: {
-            wrong: 'Use D = \u221a(\u0394x\u00b2 + \u0394y\u00b2) on each pair of vertices.',
+            wrong: 'Use $D = \\sqrt{\\Delta x^2 + \\Delta y^2}$ on each pair of vertices.',
             hint: 'For each side, find the horizontal and vertical change between its endpoints, then apply the distance formula.',
           },
         },
@@ -231,7 +239,7 @@ export const distanceLesson: Lesson = {
           id: 'is-right',
           kind: 'choice',
           prompt:
-            'A triangle is right when a\u00b2 + b\u00b2 = c\u00b2 (the two shorter sides squared add up to the longest side squared). Does 15\u00b2 + 20\u00b2 = 25\u00b2? Is this a right triangle?',
+            'A triangle is right when $a^2 + b^2 = c^2$ (the two shorter sides squared add up to the longest side squared). Does $15^2 + 20^2 = 25^2$? Is this a right triangle?',
           choices: [
             { id: 'yes', label: 'Yes, it is a right triangle' },
             { id: 'no', label: 'No, it is not' },
@@ -239,9 +247,9 @@ export const distanceLesson: Lesson = {
           correctChoice: 'yes',
           feedback: {
             correct:
-              '15\u00b2 + 20\u00b2 = 225 + 400 = 625 = 25\u00b2. Since a\u00b2 + b\u00b2 = c\u00b2, it IS a right triangle.',
-            wrong: 'Check the two shortest sides against the longest: does 15\u00b2 + 20\u00b2 equal 25\u00b2?',
-            hint: 'Square the two shorter sides and add them, then compare that total to the longest side squared — equal means it is a right triangle.',
+              '$15^2 + 20^2 = 225 + 400 = 625 = 25^2$. Since $a^2 + b^2 = c^2$, it is a right triangle.',
+            wrong: 'Check the two shorter sides against the longest: does $15^2 + 20^2$ equal $25^2$?',
+            hint: 'Square the two shorter sides and add them, then compare that total to the longest side squared \u2014 equality means it is a right triangle.',
           },
         },
       ],
@@ -271,7 +279,7 @@ export const distanceLesson: Lesson = {
           answer: 5,
           drawSegmentIds: ['leg1'],
           feedback: {
-            wrong: '\u0394x = 4 and \u0394y = 3, so use D = \u221a(\u0394x\u00b2 + \u0394y\u00b2).',
+            wrong: '$\\Delta x = 4$ and $\\Delta y = 3$, so use $D = \\sqrt{\\Delta x^2 + \\Delta y^2}$.',
             hint: 'Find the horizontal and vertical change between the two cities, then apply the distance formula.',
           },
         },
@@ -282,7 +290,7 @@ export const distanceLesson: Lesson = {
           answer: 10,
           drawSegmentIds: ['leg2'],
           feedback: {
-            wrong: '\u0394x = 6 and \u0394y = 8, so use D = \u221a(\u0394x\u00b2 + \u0394y\u00b2).',
+            wrong: '$\\Delta x = 6$ and $\\Delta y = 8$, so use $D = \\sqrt{\\Delta x^2 + \\Delta y^2}$.',
             hint: 'Find the horizontal and vertical change between the two cities, then apply the distance formula.',
           },
         },
