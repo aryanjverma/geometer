@@ -185,12 +185,19 @@ export function GraphPlane({
         const pos = p.labelPos ?? 'tr';
         const left = pos === 'tl' || pos === 'bl';
         const below = pos === 'br' || pos === 'bl';
-        const lx = sx(p.x) + (left ? -9 : 9);
-        const ly = sy(p.y) + (below ? 16 : -9);
+        const lx = sx(p.x) + (p.labelOffset?.dx ?? (left ? -9 : 9));
+        const ly = sy(p.y) + (p.labelOffset?.dy ?? (below ? 16 : -9));
+        const anchor = p.labelOffset
+          ? (p.labelOffset.dx ?? 0) < 0
+            ? 'end'
+            : 'start'
+          : left
+            ? 'end'
+            : 'start';
         return (
           <g key={p.id}>
             <circle cx={sx(p.x)} cy={sy(p.y)} r="5" className="graph-point" />
-            <text x={lx} y={ly} textAnchor={left ? 'end' : 'start'} className="graph-point-label">
+            <text x={lx} y={ly} textAnchor={anchor} className="graph-point-label">
               {p.label}
             </text>
           </g>

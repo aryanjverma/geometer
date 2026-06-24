@@ -58,7 +58,6 @@ export const distanceLesson: Lesson = {
       id: 'guided-distance',
       type: 'distance-guided',
       prompt: 'Find the distance between C (2, 1) and D (10, 7).',
-      tag: 'We do',
       graph: {
         points: [
           { id: 'C', label: 'C (2, 1)', x: 2, y: 1 },
@@ -119,7 +118,6 @@ export const distanceLesson: Lesson = {
       id: 'q1-distance',
       type: 'distance-problem',
       prompt: 'Find the distance between E and F.',
-      tag: 'You do',
       graph: {
         points: [
           { id: 'E', label: 'E (2, 3)', x: 2, y: 3 },
@@ -150,7 +148,6 @@ export const distanceLesson: Lesson = {
       id: 'q2-perimeter',
       type: 'distance-problem',
       prompt: 'Find the perimeter of triangle PQR.',
-      tag: 'You do',
       graph: {
         points: [
           { id: 'P', label: 'P (1, 1)', x: 1, y: 1, labelPos: 'br' },
@@ -205,7 +202,6 @@ export const distanceLesson: Lesson = {
       id: 'q3-right-triangle',
       type: 'distance-problem',
       prompt: 'Is triangle ABC a right triangle?',
-      tag: 'You do',
       graph: {
         points: [
           { id: 'A', label: 'A (12, 0)', x: 12, y: 0 },
@@ -258,13 +254,12 @@ export const distanceLesson: Lesson = {
       id: 'q4-journey',
       type: 'distance-problem',
       prompt: 'A car drives from Houston to Austin to Dallas. How far does it travel in total?',
-      tag: 'You do',
       carPath: ['H', 'Au', 'Da'],
       graph: {
         points: [
-          { id: 'H', label: 'Houston (1, 1)', x: 1, y: 1 },
-          { id: 'Au', label: 'Austin (5, 4)', x: 5, y: 4 },
-          { id: 'Da', label: 'Dallas (11, 12)', x: 11, y: 12, labelPos: 'bl' },
+          { id: 'H', label: 'Houston (1, 1)', x: 1, y: 1, labelOffset: { dx: 20, dy: 5 } },
+          { id: 'Au', label: 'Austin (5, 4)', x: 5, y: 4, labelOffset: { dx: 16, dy: -9 } },
+          { id: 'Da', label: 'Dallas (11, 12)', x: 11, y: 12, labelOffset: { dx: -16, dy: 9 } },
         ],
         segments: [
           { id: 'leg1', from: 'H', to: 'Au', kind: 'dist', label: '5' },
@@ -297,7 +292,7 @@ export const distanceLesson: Lesson = {
         {
           id: 'total',
           kind: 'numeric',
-          prompt: 'What is the total distance the car travels?',
+          prompt: 'If the car goes from Houston to Austin to Dallas, what is the total distance the car travels?',
           answer: 15,
           feedback: {
             correct: '5 + 10 = 15 \u2014 add the two legs of the trip together.',

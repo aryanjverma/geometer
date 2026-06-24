@@ -118,7 +118,7 @@ export const nonRightTrianglesLesson: Lesson = {
       id: 'q2-derive-perimeter',
       type: 'derive-perimeter',
       prompt:
-        'The height of $8$ divides the base of $21$ into segments of $6$ and $15$, forming two right triangles. Find the perimeter.',
+        'The height of $8$ divides the base of $21$ into segments of $6$ and $15$, forming two right triangles. Find the perimeter of the triangle.',
       triangle: {
         base: 21,
         height: 8,

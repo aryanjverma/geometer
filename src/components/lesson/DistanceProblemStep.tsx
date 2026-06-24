@@ -18,12 +18,6 @@ const CELEBRATE_MS = 1200;
 const CAR_MS_PER_UNIT = 200;
 const CAR_END_BUFFER_MS = 500;
 
-const TAG_CLASS: Record<string, string> = {
-  'I do': 'step-tag-ido',
-  'We do': 'step-tag-wedo',
-  'You do': 'step-tag-youdo',
-};
-
 function fieldsFor(sub: DistanceSubStep): GuidedInput[] {
   if (sub.inputs && sub.inputs.length > 0) return sub.inputs;
   return [{ id: sub.id, label: '', answer: sub.answer ?? 0 }];
@@ -38,7 +32,6 @@ function numericMatches(sub: DistanceSubStep, values: number[]): boolean {
 export function DistanceProblemStep({ step, onCorrect }: DistanceProblemStepProps) {
   const subSteps = step.subSteps ?? [];
   const graph = step.graph;
-  const tag = step.tag ?? 'You do';
 
   const [partIndex, setPartIndex] = useState(0);
   const [values, setValues] = useState<string[]>([]);
@@ -136,7 +129,6 @@ export function DistanceProblemStep({ step, onCorrect }: DistanceProblemStepProp
     <div className="step-area">
       {celebrate && <Confetti />}
       <div className="question-box">
-        <span className={`step-tag ${TAG_CLASS[tag]}`}>{tag}</span>
         <p className="step-prompt"><MathText>{sub.prompt}</MathText></p>
         {graph && (
           <GraphPlane

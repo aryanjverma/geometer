@@ -101,7 +101,12 @@ export function GeneralTriangle({
         </>
       ) : (
         baseLabel != null && (
-          <text x={(bl[0] + br[0]) / 2} y={baseY + 24} textAnchor="middle" className="side-label">
+          <text
+            x={(bl[0] + br[0]) / 2}
+            y={baseY + 24}
+            textAnchor="middle"
+            className={`side-label ${revealSides ? 'reveal' : ''}`}
+          >
             {baseLabel}
           </text>
         )

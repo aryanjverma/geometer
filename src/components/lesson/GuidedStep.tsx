@@ -110,7 +110,6 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
     <div className="step-area">
       {celebrate && <Confetti />}
       <div className="question-box">
-        <span className="step-tag step-tag-wedo">We do</span>
         <p className="step-prompt"><MathText>{part.prompt}</MathText></p>
         {renderVisual()}
       </div>

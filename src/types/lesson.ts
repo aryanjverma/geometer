@@ -101,6 +101,8 @@ export interface GraphPoint {
   y: number;
   /** Where the label sits relative to the dot. Defaults to 'tr' (top-right). */
   labelPos?: 'tr' | 'tl' | 'br' | 'bl';
+  /** Pixel nudge of the label from the dot. Overrides the labelPos placement. */
+  labelOffset?: { dx?: number; dy?: number };
 }
 
 /**
@@ -165,8 +167,6 @@ export interface LessonStep {
   feedback?: StepFeedback;
   /** Coordinate-plane visual for distance steps. */
   graph?: GraphContent;
-  /** Phase label shown on distance problems. */
-  tag?: 'I do' | 'We do' | 'You do';
   /** Ordered solve steps for distance-guided / distance-problem. */
   subSteps?: DistanceSubStep[];
   /** Optional intro line shown above the graph (distance-demo). */

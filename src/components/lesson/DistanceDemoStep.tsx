@@ -30,7 +30,6 @@ export function DistanceDemoStep({ step, onCorrect }: DistanceDemoStepProps) {
   return (
     <div className="step-area">
       <div className="question-box">
-        <span className="step-tag step-tag-ido">I do</span>
         <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
         {demo?.intro && (
           <p className="muted demo-intro">
