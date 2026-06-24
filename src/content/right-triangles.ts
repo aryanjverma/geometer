@@ -72,7 +72,7 @@ export const rightTrianglesLesson: Lesson = {
         },
         {
           id: 'c',
-          prompt: 'Finally, solve for $c$ by taking the square root of $c^2$.',
+          prompt: 'Finally, solve for the hypotenuse, $c$, by taking the square root of $c^2$.',
           answer: 5,
           feedback: {
             correct: '$\\sqrt{25} = 5$ — the hypotenuse is 5.',
