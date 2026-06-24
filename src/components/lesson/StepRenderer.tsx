@@ -8,6 +8,8 @@ import { Confetti } from './Confetti';
 import { DemonstrationStep } from './DemonstrationStep';
 import { GuidedStep } from './GuidedStep';
 import { TransitionStep } from './TransitionStep';
+import { DistanceDemoStep } from './DistanceDemoStep';
+import { DistanceProblemStep } from './DistanceProblemStep';
 
 interface FeedbackState {
   message: string;
@@ -101,6 +103,14 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
 
   if (step.type === 'guided') {
     return <GuidedStep step={step} onCorrect={onCorrect} />;
+  }
+
+  if (step.type === 'distance-demo') {
+    return <DistanceDemoStep step={step} onCorrect={onCorrect} />;
+  }
+
+  if (step.type === 'distance-guided' || step.type === 'distance-problem') {
+    return <DistanceProblemStep step={step} onCorrect={onCorrect} />;
   }
 
   if (step.type === 'interactive-unfold' && step.triangle && 'legs' in step.triangle) {

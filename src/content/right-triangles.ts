@@ -58,7 +58,7 @@ export const rightTrianglesLesson: Lesson = {
           acceptAnyOrder: true,
           feedback: {
             wrong: 'The legs are the two shorter sides that form the right angle.',
-            hint: 'The legs are 3 and 4 (in either order).',
+            hint: 'The legs are the two shorter sides that meet at the right angle — read their lengths off the figure.',
           },
         },
         {
@@ -67,7 +67,7 @@ export const rightTrianglesLesson: Lesson = {
           answer: 25,
           feedback: {
             wrong: 'Square each leg and add: 3² + 4².',
-            hint: '3² + 4² = 9 + 16 = 25.',
+            hint: 'Square each leg on its own, then add the two squares.',
           },
         },
         {
@@ -77,7 +77,7 @@ export const rightTrianglesLesson: Lesson = {
           feedback: {
             correct: '√25 = 5 — the hypotenuse is 5.',
             wrong: 'Take the square root of 25.',
-            hint: '√25 = 5.',
+            hint: 'You found c squared — undo the square by taking the square root.',
           },
         },
       ],
@@ -97,7 +97,7 @@ export const rightTrianglesLesson: Lesson = {
       feedback: {
         correct: '5² + 12² = 25 + 144 = 169 = 13²',
         wrong: 'Square each leg, add them, then take the square root.',
-        hint: '5² + 12² = ?',
+        hint: 'Square both legs, add them, then take the square root of that sum.',
       },
     },
     {
@@ -125,7 +125,7 @@ export const rightTrianglesLesson: Lesson = {
           prompt: 'Use the Pythagorean theorem to find the missing leg.',
           answer: 12,
           feedback: {
-            wrong: 'Use c² − a² = b² when you know the hypotenuse and one leg.',
+            wrong: 'You know the hypotenuse and one leg — subtract their squares, then take the square root to get the missing leg.',
           },
         },
         {
@@ -135,7 +135,7 @@ export const rightTrianglesLesson: Lesson = {
           feedback: {
             correct: '9 + 12 + 15 = 36 — the perimeter is the sum of all three sides.',
             wrong: 'Add all three sides: the two legs and the hypotenuse.',
-            hint: 'Perimeter = 9 + 12 + 15.',
+            hint: 'Once you have all three sides, add them together.',
           },
         },
       ],
@@ -151,7 +151,7 @@ export const rightTrianglesLesson: Lesson = {
           prompt: 'Find the missing leg.',
           answer: 6,
           feedback: {
-            wrong: 'Use c² − a² = b² when you know the hypotenuse and one leg.',
+            wrong: 'You know the hypotenuse and one leg — subtract their squares, then take the square root to get the missing leg.',
           },
         },
         {

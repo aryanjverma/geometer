@@ -10,7 +10,10 @@ export type StepType =
   | 'perimeter-from-area'
   | 'demonstration'
   | 'guided'
-  | 'transition';
+  | 'transition'
+  | 'distance-demo'
+  | 'distance-guided'
+  | 'distance-problem';
 
 export interface StepFeedback {
   correct?: string;
@@ -52,6 +55,8 @@ export interface DemoReveal {
   label: string;
   body: string;
   formula?: string;
+  /** Segment ids to animate onto a GraphPlane when this step is revealed. */
+  drawSegmentIds?: string[];
 }
 
 /** One numeric field within a guided part. */
@@ -88,6 +93,60 @@ export interface TransitionContent {
   cta?: string;
 }
 
+/** A labeled point on the coordinate plane. */
+export interface GraphPoint {
+  id: string;
+  label: string;
+  x: number;
+  y: number;
+  /** Where the label sits relative to the dot. Defaults to 'tr' (top-right). */
+  labelPos?: 'tr' | 'tl' | 'br' | 'bl';
+}
+
+/**
+ * A segment between two points. `kind` controls how it draws:
+ * - 'dx'   horizontal leg (change in x)
+ * - 'dy'   vertical leg (change in y)
+ * - 'dist' direct distance line between the two points
+ */
+export interface GraphSegment {
+  id: string;
+  from: string;
+  to: string;
+  label?: string;
+  kind?: 'dx' | 'dy' | 'dist';
+}
+
+/** Points and segments rendered on a GraphPlane. The viewBox auto-fits the points. */
+export interface GraphContent {
+  points: GraphPoint[];
+  segments: GraphSegment[];
+}
+
+/** A single multiple-choice option for a distance sub-step. */
+export interface DistanceChoice {
+  id: string;
+  label: string;
+}
+
+/** One solve step inside a distance problem. */
+export interface DistanceSubStep {
+  id: string;
+  prompt: string;
+  kind: 'numeric' | 'multi' | 'choice';
+  /** Multi-field input (e.g. Δx and Δy together). */
+  inputs?: GuidedInput[];
+  /** Single numeric answer. */
+  answer?: number;
+  /** Choice options (for kind === 'choice'). */
+  choices?: DistanceChoice[];
+  /** Id of the correct choice. */
+  correctChoice?: string;
+  /** Segment ids to animate onto the graph once this step is solved. */
+  drawSegmentIds?: string[];
+  feedback?: StepFeedback;
+}
+
 export interface LessonStep {
   id: string;
   type: StepType;
@@ -100,6 +159,16 @@ export interface LessonStep {
   guided?: GuidedPart[];
   transition?: TransitionContent;
   feedback?: StepFeedback;
+  /** Coordinate-plane visual for distance steps. */
+  graph?: GraphContent;
+  /** Phase label shown on distance problems. */
+  tag?: 'I do' | 'We do' | 'You do';
+  /** Ordered solve steps for distance-guided / distance-problem. */
+  subSteps?: DistanceSubStep[];
+  /** Optional intro line shown above the graph (distance-demo). */
+  intro?: string;
+  /** Ordered point ids a car drives along once the final answer is solved. */
+  carPath?: string[];
 }
 
 export interface Lesson {

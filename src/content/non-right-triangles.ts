@@ -53,7 +53,7 @@ export const nonRightTrianglesLesson: Lesson = {
           ],
           feedback: {
             wrong: 'The base is the bottom side; the height is the perpendicular distance up to the top vertex.',
-            hint: 'base = 5 and height = 4.',
+            hint: 'The base is the side you measure from; the height is the straight-up perpendicular distance to the opposite vertex.',
           },
         },
         {
@@ -63,7 +63,7 @@ export const nonRightTrianglesLesson: Lesson = {
           feedback: {
             correct: '½ × 5 × 4 = 10',
             wrong: 'Multiply the base by the height, then take half.',
-            hint: '½ × 5 × 4 = 10.',
+            hint: 'Multiply the base by the height, then take half.',
           },
         },
       ],
@@ -103,7 +103,7 @@ export const nonRightTrianglesLesson: Lesson = {
       feedback: {
         correct: '10 + 17 + 21 = 48',
         wrong: 'Find each slanted side first, then add all three sides.',
-        hint: 'Solve for the other sides with the Pythagorean theorem: √(6² + 8²) and √(15² + 8²).',
+        hint: 'Each slanted side is the hypotenuse of a right triangle formed by the height and a base piece — find each with the Pythagorean theorem, then add all three sides.',
       },
     },
     {
@@ -141,7 +141,7 @@ export const nonRightTrianglesLesson: Lesson = {
       feedback: {
         correct: '30 + 17 + 17 = 64',
         wrong: 'Find the base from the area, then each side with the Pythagorean theorem.',
-        hint: 'Area = ½ × base × 8 = 120, so base = 30. Each half-base is 15, so a side is √(15² + 8²) = 17.',
+        hint: 'Work backward from the area to recover the base, then use the Pythagorean theorem on each half to get the slanted sides.',
       },
     },
   ],

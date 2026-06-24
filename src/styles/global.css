@@ -345,6 +345,96 @@ a {
   margin: 0 auto 0.5rem;
 }
 
+.graph-svg {
+  width: 100%;
+  max-width: 100%;
+  max-height: 52vh;
+  display: block;
+  margin: 0 auto 0.5rem;
+}
+
+.graph-grid {
+  stroke: #e2e8f0;
+  stroke-width: 1;
+}
+
+.graph-axis {
+  stroke: #94a3b8;
+  stroke-width: 1.5;
+}
+
+.graph-tick {
+  font-size: 11px;
+  fill: var(--muted);
+}
+
+.graph-point {
+  fill: #1e1b4b;
+}
+
+.graph-point-label {
+  font-size: 12px;
+  font-weight: 700;
+  fill: #1e1b4b;
+}
+
+.graph-seg {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  /* Lines draw in by retracting the dash offset; set per-segment inline. */
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.graph-seg-dx {
+  stroke: #0d9488;
+}
+
+.graph-seg-dy {
+  stroke: #f59e0b;
+}
+
+.graph-seg-dist {
+  stroke: var(--primary);
+}
+
+.graph-seg-label {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.graph-seg-label-dx {
+  fill: #0f766e;
+}
+
+.graph-seg-label-dy {
+  fill: #b45309;
+}
+
+.graph-seg-label-dist {
+  fill: var(--primary-dark);
+}
+
+.graph-car {
+  pointer-events: none;
+}
+
+.graph-car text {
+  font-size: 22px;
+}
+
+.choice-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin-top: 0.5rem;
+}
+
+.choice-btn {
+  width: 100%;
+  text-align: center;
+}
+
 .interactive-stage-wrap {
   width: 100%;
   margin-bottom: 1rem;
@@ -502,6 +592,11 @@ a {
 .step-tag-wedo {
   background: #ecfdf5;
   color: #047857;
+}
+
+.step-tag-youdo {
+  background: #fff7ed;
+  color: #c2410c;
 }
 
 .demo-intro {
