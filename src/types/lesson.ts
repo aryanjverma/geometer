@@ -13,7 +13,17 @@ type StepType =
   | 'transition'
   | 'distance-demo'
   | 'distance-guided'
-  | 'distance-problem';
+  | 'distance-problem'
+  | 'transform-demo'
+  | 'transform-guided'
+  | 'transform-problem'
+  | 'congruence-demo'
+  | 'similarity-demo'
+  | 'congruence-guided'
+  | 'similarity-guided'
+  | 'congruence-check'
+  | 'similarity-check'
+  | 'shape-match';
 
 interface StepFeedback {
   correct?: string;
@@ -153,10 +163,82 @@ export interface DistanceSubStep {
   feedback?: StepFeedback;
 }
 
+/** An integer-grid coordinate point used by transformation/match interactives. */
+export interface GridPoint {
+  x: number;
+  y: number;
+}
+
+/** A labeled polygon on the interactive grid, defined by ordered vertices. */
+export interface GridShape {
+  id: string;
+  vertices: GridPoint[];
+  label?: string;
+}
+
+/**
+ * Viewport + reference geometry for an interactive coordinate grid.
+ * The grid renders integer gridlines from xMin..xMax and yMin..yMax.
+ */
+export interface GridContent {
+  xMin: number;
+  xMax: number;
+  yMin: number;
+  yMax: number;
+  /** Fixed reference shapes (not draggable). */
+  shapes?: GridShape[];
+}
+
+/** A single transformation operation, used standalone or chained in `steps`. */
+export interface TransformOp {
+  kind: 'translate' | 'reflect' | 'rotate' | 'dilate';
+  translate?: { dx: number; dy: number };
+  reflect?: { axis: 'x' | 'y' };
+  rotate?: { center: GridPoint; degrees: 90 | 180 | 270; direction: 'cw' | 'ccw' };
+  dilate?: { center: GridPoint; factor: number };
+}
+
+/**
+ * Describes a transformation problem on the interactive grid: the learner
+ * manipulates `source` and is correct when the result matches `target`.
+ */
+export interface TransformContent {
+  /** Primary transformation kind (for single-step demos/problems). */
+  kind: 'translate' | 'reflect' | 'rotate' | 'dilate';
+  /** The starting shape the learner moves. */
+  source: GridShape;
+  /** Expected resulting vertices after the transformation. */
+  target: GridPoint[];
+  /** Human-readable instruction, e.g. "Translate 4 right and 5 up". */
+  instruction?: string;
+  translate?: { dx: number; dy: number };
+  reflect?: { axis: 'x' | 'y' };
+  rotate?: { center: GridPoint; degrees: 90 | 180 | 270; direction: 'cw' | 'ccw' };
+  dilate?: { center: GridPoint; factor: number };
+  /** Ordered ops for 2-step combination problems (applied in sequence). */
+  steps?: TransformOp[];
+}
+
+/**
+ * Describes a "drag a shape onto another" proof problem. Congruence allows
+ * translate + rotate; similarity adds dilate to scale the shape onto the target.
+ */
+export interface MatchContent {
+  goal: 'congruent' | 'similar';
+  /** The shape the learner manipulates. */
+  source: GridShape;
+  /** The fixed target shape to land on. */
+  target: GridShape;
+  /** Manipulations the learner is allowed to use. */
+  allow: Array<'translate' | 'rotate' | 'dilate'>;
+}
+
 export interface LessonStep {
   id: string;
   type: StepType;
   prompt: string;
+  /** On-screen phase label for the gradual-release arc. */
+  tag?: 'I do' | 'We do' | 'You do';
   answer?: number;
   formula?: string;
   triangle?: TriangleLegs | TrianglePartial | TriangleGeneral;
@@ -173,6 +255,12 @@ export interface LessonStep {
   intro?: string;
   /** Ordered point ids a car drives along once the final answer is solved. */
   carPath?: string[];
+  /** Interactive coordinate grid (transformations / congruence / similarity). */
+  grid?: GridContent;
+  /** Transformation problem data (transform-demo/guided/problem). */
+  transform?: TransformContent;
+  /** Drag-to-match proof data (shape-match). */
+  match?: MatchContent;
 }
 
 export interface Lesson {

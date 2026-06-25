@@ -12,7 +12,7 @@ import {
   fetchProfile,
   saveProfile,
   subscribeProgress,
-  updateLessonProgress,
+  recordLessonActivity,
   deleteUserData,
   resetProgress as resetProgressService,
 } from '@/services/progressService';
@@ -77,27 +77,40 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     return unsub;
   }, [user]);
 
+  const activityEntry = useCallback(
+    () => ({
+      displayName: profile?.displayName ?? user?.displayName ?? 'Learner',
+      photoURL: profile?.photoURL ?? user?.photoURL ?? '',
+    }),
+    [profile, user],
+  );
+
   const setStep = useCallback(
     async (lessonId: string, step: number) => {
       if (!user) return;
-      const next = await updateLessonProgress(user.uid, lessonId, {
-        currentStep: step,
-      });
+      const next = await recordLessonActivity(
+        user.uid,
+        lessonId,
+        { currentStep: step },
+        activityEntry(),
+      );
       setProgress(next);
     },
-    [user],
+    [user, activityEntry],
   );
 
   const completeLesson = useCallback(
     async (lessonId: string) => {
       if (!user) return;
-      const next = await updateLessonProgress(user.uid, lessonId, {
-        currentStep: 0,
-        completed: true,
-      });
+      const next = await recordLessonActivity(
+        user.uid,
+        lessonId,
+        { currentStep: 0, completed: true },
+        activityEntry(),
+      );
       setProgress(next);
     },
-    [user],
+    [user, activityEntry],
   );
 
   const updateProfile = useCallback(

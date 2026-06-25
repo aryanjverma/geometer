@@ -689,6 +689,43 @@ h3 {
   margin: 0;
 }
 
+.congrats-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+}
+
+.congrats-emoji {
+  font-size: 3.5rem;
+  line-height: 1;
+}
+
+.congrats-avatar {
+  width: 72px;
+  height: 72px;
+}
+
+.congrats-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.congrats-message {
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  max-width: 32rem;
+  margin: 0;
+}
+
+.congrats-countdown {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
 .demo-reveal-list {
   list-style: none;
   margin: 0 0 1rem;
@@ -798,4 +835,160 @@ h3 {
   .guided-form .btn {
     width: 100%;
   }
+}
+
+/* --- Phase 2: streaks, leaderboard, interactive grids --- */
+
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-weight: 700;
+}
+
+.streak-flame {
+  font-size: 1.1rem;
+}
+
+.streak-count {
+  font-size: 1.1rem;
+}
+
+.streak-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #ea580c;
+}
+
+.leaderboard-header {
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid transparent;
+}
+
+.leaderboard-rank {
+  flex: 0 0 2rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+
+.leaderboard-avatar {
+  font-size: 1.5rem;
+}
+
+.leaderboard-name {
+  flex: 1;
+  font-weight: 600;
+  text-align: left;
+}
+
+.leaderboard-you {
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.leaderboard-streak {
+  font-weight: 700;
+  color: #c2410c;
+  white-space: nowrap;
+}
+
+.leaderboard-row.medal-gold {
+  border-color: #fcd34d;
+  background: linear-gradient(135deg, #fffbeb, #fef3c7);
+}
+
+.leaderboard-row.medal-silver {
+  border-color: #cbd5e1;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+}
+
+.leaderboard-row.medal-bronze {
+  border-color: #fdba74;
+  background: linear-gradient(135deg, #fff7ed, #fed7aa);
+}
+
+.leaderboard-row.leaderboard-me {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
+
+.grid-stage-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.static-grid-svg {
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.static-grid-label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.grid-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  min-height: 2rem;
+}
+
+.grid-hint {
+  font-size: 0.85rem;
+}
+
+.btn-reset {
+  background: transparent;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
+.checkpoint-badge {
+  color: #ea580c;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.transform-instruction {
+  font-weight: 600;
+  color: var(--primary-dark);
+  background: #eef2ff;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  margin: 0.5rem 0;
 }

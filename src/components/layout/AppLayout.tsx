@@ -10,6 +10,9 @@ export function AppLayout() {
         <NavLink to="/dashboard" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
           Dashboard
         </NavLink>
+        <NavLink to="/leaderboard" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
+          Leaderboard
+        </NavLink>
         <NavLink to="/account" className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
           Account
         </NavLink>

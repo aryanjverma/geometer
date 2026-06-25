@@ -1,19 +1,18 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { getLessonMeta } from '@/content/lessons';
 import { useProgress } from '@/contexts/ProgressContext';
 import { getLessonProgress, isLessonLocked } from '@/services/progressService';
 import { ProgressBar } from '@/components/dashboard/ProgressBar';
 import { StepRenderer } from './StepRenderer';
-
-/** How long the bar lingers at 100% before navigating to the dashboard. */
-const FINISH_DELAY_MS = 1000;
+import { CongratsSlide } from './CongratsSlide';
 
 export function LessonView() {
   const { lessonId = '' } = useParams();
   const navigate = useNavigate();
   const { progress, loading, setStep, completeLesson } = useProgress();
   const [finishing, setFinishing] = useState(false);
+  const [saveError, setSaveError] = useState(false);
 
   const meta = getLessonMeta(lessonId);
 
@@ -41,20 +40,27 @@ export function LessonView() {
     : Math.round((currentIndex / steps.length) * 100);
 
   const handleCorrect = async () => {
-    if (isLast) {
-      setFinishing(true);
-      setTimeout(async () => {
+    setSaveError(false);
+    try {
+      if (isLast) {
+        setFinishing(true);
         if (!completed) {
           await completeLesson(lessonId);
         } else {
           await setStep(lessonId, 0);
         }
-        navigate('/dashboard');
-      }, FINISH_DELAY_MS);
-      return;
+        return;
+      }
+      await setStep(lessonId, currentIndex + 1);
+    } catch {
+      // A rejected write (e.g. Firestore rules) rolls the optimistic step
+      // back; surface it instead of silently appearing to "go back".
+      setFinishing(false);
+      setSaveError(true);
     }
-    await setStep(lessonId, currentIndex + 1);
   };
+
+  const goToDashboard = useCallback(() => navigate('/dashboard'), [navigate]);
 
   return (
     <div className="lesson-page">
@@ -66,7 +72,18 @@ export function LessonView() {
 
       <ProgressBar percent={percent} label={`${title} · Step ${currentIndex + 1} of ${steps.length}`} />
 
-      <StepRenderer key={step.id} step={step} stepIndex={currentIndex} onCorrect={handleCorrect} />
+      {finishing ? (
+        <CongratsSlide title={title} onContinue={goToDashboard} />
+      ) : (
+        <>
+          <StepRenderer key={step.id} step={step} stepIndex={currentIndex} onCorrect={handleCorrect} />
+          {saveError && (
+            <p className="feedback feedback-wrong" role="alert">
+              Couldn’t save your progress. Check your connection and try again.
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 }

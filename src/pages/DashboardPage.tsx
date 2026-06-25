@@ -5,6 +5,7 @@ import { LESSONS } from '@/content/lessons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/contexts/ProgressContext';
 import { getLessonButtonState, getProgressPercent } from '@/services/progressService';
+import { effectiveStreak, todayString } from '@/services/streakService';
 
 function firstName(name: string | null | undefined): string {
   return name?.trim().split(/\s+/)[0] || 'there';
@@ -15,6 +16,7 @@ export function DashboardPage() {
   const { progress, profile, loading } = useProgress();
   const percent = getProgressPercent(progress, LESSONS.map((l) => l.lessonId));
   const name = firstName(profile?.displayName ?? user?.displayName);
+  const streak = effectiveStreak(progress.streak, progress.lastActivityDate, todayString());
 
   if (loading) {
     return (
@@ -30,6 +32,11 @@ export function DashboardPage() {
         <GeometerAvatar size={56} />
         <h1 className="brand-wordmark">Geometer</h1>
         <p className="dashboard-greeting">{percent > 0 ? 'Welcome back' : 'Hello'}, {name}</p>
+        <div className="streak-badge" title="Daily streak">
+          <span className="streak-flame" aria-hidden="true">{'\u{1F525}'}</span>
+          <span className="streak-count">{streak}</span>
+          <span className="streak-label">day{streak === 1 ? '' : 's'}</span>
+        </div>
       </header>
       <ProgressBar percent={percent} label="Course progress" />
       <div className="lesson-list">

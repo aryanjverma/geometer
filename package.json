@@ -19,12 +19,14 @@
     "react-router-dom": "^7.5.0"
   },
   "devDependencies": {
+    "@opentelemetry/api": "^1.9.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/katex": "^0.16.8",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@vitejs/plugin-react": "^4.3.4",
+    "firebase-admin": "^14.1.0",
     "jsdom": "^29.1.1",
     "typescript": "~5.7.2",
     "vite": "^6.2.0",

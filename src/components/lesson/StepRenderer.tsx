@@ -10,6 +10,9 @@ import { GuidedStep } from './GuidedStep';
 import { TransitionStep } from './TransitionStep';
 import { DistanceDemoStep } from './DistanceDemoStep';
 import { DistanceProblemStep } from './DistanceProblemStep';
+import { TransformStep } from './TransformStep';
+import { ShapeMatchStep } from './ShapeMatchStep';
+import { GridCheckStep } from './GridCheckStep';
 import { MathText } from '@/components/MathText';
 
 interface FeedbackState {
@@ -102,12 +105,28 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
     return <TransitionStep step={step} onCorrect={onCorrect} />;
   }
 
-  if (step.type === 'demonstration') {
+  if (step.type === 'demonstration' || step.type === 'congruence-demo' || step.type === 'similarity-demo') {
     return <DemonstrationStep step={step} onCorrect={onCorrect} />;
   }
 
-  if (step.type === 'guided') {
+  if (step.type === 'guided' || step.type === 'congruence-guided' || step.type === 'similarity-guided') {
     return <GuidedStep step={step} onCorrect={onCorrect} />;
+  }
+
+  if (
+    step.type === 'transform-demo' ||
+    step.type === 'transform-guided' ||
+    step.type === 'transform-problem'
+  ) {
+    return <TransformStep step={step} onCorrect={onCorrect} />;
+  }
+
+  if (step.type === 'congruence-check' || step.type === 'similarity-check') {
+    return <GridCheckStep step={step} onCorrect={onCorrect} />;
+  }
+
+  if (step.type === 'shape-match') {
+    return <ShapeMatchStep step={step} onCorrect={onCorrect} />;
   }
 
   if (step.type === 'distance-demo') {

@@ -2,6 +2,8 @@ import type { Lesson } from '@/types/lesson';
 import { rightTrianglesLesson } from './right-triangles';
 import { nonRightTrianglesLesson } from './non-right-triangles';
 import { distanceLesson } from './distance-coordinate-plane';
+import { transformationsLesson } from './transformations';
+import { congruenceSimilarityLesson } from './congruence-similarity';
 
 export interface LessonMeta {
   lessonId: string;
@@ -35,6 +37,22 @@ export const LESSONS: LessonMeta[] = [
       'Use the Pythagorean theorem to measure distance between points — watch the right triangle draw itself on the grid, then solve distance, perimeter, and route problems.',
     requires: 'non-right-triangles',
     lesson: distanceLesson,
+  },
+  {
+    lessonId: 'transformations',
+    title: 'Transformations',
+    description:
+      'Translate, reflect, rotate, and dilate shapes on the coordinate grid — watch each move demonstrated, then drag the vertices into place to perform two-step transformations yourself.',
+    requires: 'distance-coordinate-plane',
+    lesson: transformationsLesson,
+  },
+  {
+    lessonId: 'congruence-similarity',
+    title: 'Congruence and Similarity',
+    description:
+      'Decide when figures are congruent or similar by comparing sides and ratios, then drag one shape onto another to prove it.',
+    requires: 'transformations',
+    lesson: congruenceSimilarityLesson,
   },
 ];
 

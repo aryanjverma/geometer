@@ -4,6 +4,7 @@ import { StaticTriangle } from './StaticTriangle';
 import { GeneralTriangle } from './GeneralTriangle';
 import { ShearTriangle } from './ShearTriangle';
 import { WhyHalfParallelogram } from './WhyHalfParallelogram';
+import { StaticGrid, gridShapes } from './StaticGrid';
 import { MathText } from '@/components/MathText';
 
 interface DemonstrationStepProps {
@@ -20,6 +21,9 @@ export function DemonstrationStep({ step, onCorrect }: DemonstrationStepProps) {
   const triangle = step.triangle;
 
   const renderVisual = () => {
+    if (step.grid) {
+      return <StaticGrid {...step.grid} shapes={gridShapes(step.grid)} />;
+    }
     if (demo?.interactive === 'shear' && triangle && 'base' in triangle) {
       return (
         <ShearTriangle

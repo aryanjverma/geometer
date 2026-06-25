@@ -3,8 +3,10 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { ProgressProvider } from '@/contexts/ProgressContext';
 import { ProtectedRoute, PublicOnlyRoute } from '@/components/auth/ProtectedRoute';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { LoginPage } from '@/pages/LoginPage';
 import { DashboardPage } from '@/pages/DashboardPage';
+import { LeaderboardPage } from '@/pages/LeaderboardPage';
 import { AccountPage } from '@/pages/AccountPage';
 import { LessonPage } from '@/pages/LessonPage';
 
@@ -13,7 +15,8 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ProgressProvider>
-          <Routes>
+          <ErrorBoundary>
+            <Routes>
             <Route
               path="/login"
               element={
@@ -31,6 +34,7 @@ export default function App() {
               }
             >
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
               <Route path="/account" element={<AccountPage />} />
             </Route>
 
@@ -45,7 +49,8 @@ export default function App() {
 
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
+            </Routes>
+          </ErrorBoundary>
         </ProgressProvider>
       </AuthProvider>
     </BrowserRouter>

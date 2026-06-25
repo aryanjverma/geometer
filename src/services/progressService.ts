@@ -13,6 +13,8 @@ import {
   type UserProgress,
   LESSON_ID,
 } from '@/types/progress';
+import { bumpStreak, todayString } from './streakService';
+import { writeLeaderboardEntry, removeLeaderboardEntry } from './leaderboardService';
 
 function progressDoc(uid: string) {
   return doc(db, 'users', uid, 'data', 'progress');
@@ -57,12 +59,58 @@ export async function updateLessonProgress(
     completed: false,
   };
   const next: UserProgress = {
+    ...current,
     lessonProgress: {
       ...current.lessonProgress,
       [lessonId]: { ...existing, ...update },
     },
   };
   await saveProgress(uid, next);
+  return next;
+}
+
+/**
+ * Apply a lesson-progress update and bump the daily streak in a single
+ * Firestore write, then mirror the streak into the public leaderboard.
+ *
+ * Combining both mutations into one document write is what keeps the streak
+ * stable: every snapshot the live listener receives already contains
+ * `streak`/`lastActivityDate`, so there is no intermediate server state that
+ * could revert a freshly-bumped streak back to zero.
+ */
+export async function recordLessonActivity(
+  uid: string,
+  lessonId: string,
+  update: Partial<LessonProgress>,
+  entry: { displayName: string; photoURL: string },
+): Promise<UserProgress> {
+  const current = await fetchProgress(uid);
+  const today = todayString();
+  const { streak, lastActivityDate } = bumpStreak(
+    current.lastActivityDate,
+    today,
+    current.streak ?? 0,
+  );
+  const existing = current.lessonProgress[lessonId] ?? {
+    currentStep: 0,
+    completed: false,
+  };
+  const next: UserProgress = {
+    ...current,
+    lessonProgress: {
+      ...current.lessonProgress,
+      [lessonId]: { ...existing, ...update },
+    },
+    streak,
+    lastActivityDate,
+  };
+  await saveProgress(uid, next);
+  await writeLeaderboardEntry({
+    uid,
+    displayName: entry.displayName,
+    photoURL: entry.photoURL,
+    streak,
+  });
   return next;
 }
 
@@ -80,11 +128,12 @@ export async function deleteUserData(uid: string) {
   await Promise.all([
     deleteDoc(progressDoc(uid)),
     deleteDoc(profileDoc(uid)),
+    removeLeaderboardEntry(uid),
   ]);
 }
 
 export async function resetProgress(uid: string) {
-  await deleteDoc(progressDoc(uid));
+  await Promise.all([deleteDoc(progressDoc(uid)), removeLeaderboardEntry(uid)]);
 }
 
 export function getLessonProgress(

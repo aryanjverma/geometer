@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { GuidedPart, LessonStep } from '@/types/lesson';
 import { StaticTriangle } from './StaticTriangle';
 import { GeneralTriangle } from './GeneralTriangle';
+import { StaticGrid, gridShapes } from './StaticGrid';
 import { Confetti } from './Confetti';
 import { MathText } from '@/components/MathText';
 
@@ -84,6 +85,9 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
   };
 
   const renderVisual = () => {
+    if (step.grid) {
+      return <StaticGrid {...step.grid} shapes={gridShapes(step.grid)} />;
+    }
     if (triangle && 'legs' in triangle) {
       const { legs } = triangle;
       return (
