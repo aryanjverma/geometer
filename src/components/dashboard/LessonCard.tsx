@@ -48,7 +48,7 @@ export function LessonCard({
   return (
     <article className={`lesson-card ${locked ? 'lesson-card-locked' : ''}`}>
       <h2>{title}</h2>
-      <p className="muted">{description}</p>
+      <p className="muted lesson-card-desc">{description}</p>
 
       {showConcepts && (
         <div className="concept-overview">

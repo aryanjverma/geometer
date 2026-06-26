@@ -16,6 +16,11 @@ import {
   completedInScopeLessons,
   type QuestionFlags,
 } from '@/services/reviewSession';
+import {
+  clearSession,
+  loadSession,
+  saveSession,
+} from '@/services/reviewSessionStore';
 import { ProgressBar } from '@/components/dashboard/ProgressBar';
 import { StepRenderer } from '@/components/lesson/StepRenderer';
 import { MathText } from '@/components/MathText';
@@ -31,6 +36,17 @@ const SESSION_COUNT = 5;
  */
 const RESKIN_BUDGET_MS = 9000;
 const HINT_BUDGET_MS = 9000;
+
+/**
+ * Up-front reskin preload tuning. Reskins load at most {@link RESKIN_CONCURRENCY}
+ * at a time: bursting all five at once overwhelms the local Functions emulator
+ * (connection resets) and risks the free-tier rate limit. The whole phase is
+ * also capped by {@link RESKIN_PHASE_BUDGET_MS} so a slow or unreachable backend
+ * can never leave the learner staring at "Preparing…" — once the deadline passes
+ * we proceed with plain prompts for whatever has not resolved.
+ */
+const RESKIN_CONCURRENCY = 2;
+const RESKIN_PHASE_BUDGET_MS = 12000;
 
 /** Resolve with `fallback` if `promise` has not settled within `ms`. */
 function withBudget<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
@@ -52,6 +68,53 @@ function withBudget<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T>
 interface SessionQuestion {
   format: QuestionFormat;
   question: GeneratedQuestion;
+  /** Frozen prompt shown to the learner: an applied reskin, or the plain
+   * `basePrompt` when no reskin loaded. Resolved once, up front. */
+  displayPrompt: string;
+}
+
+/**
+ * Resolve the display prompt for every question up front, with bounded
+ * concurrency and an overall deadline. Each entry defaults to its `basePrompt`
+ * and is upgraded only if a valid reskin returns in time; failures, timeouts,
+ * cancellation (`isActive` flips false), and the phase deadline all leave the
+ * plain prompt in place. No new calls start after the deadline or a cancel, so
+ * a stalled backend cannot extend the wait beyond one in-flight call budget.
+ */
+async function loadReskins(
+  generated: SessionQuestion[],
+  interests: string[],
+  isActive: () => boolean,
+): Promise<SessionQuestion[]> {
+  const out = generated.map((q) => ({
+    ...q,
+    displayPrompt: q.question.basePrompt,
+  }));
+  const deadline = performance.now() + RESKIN_PHASE_BUDGET_MS;
+  let next = 0;
+
+  const worker = async (): Promise<void> => {
+    while (isActive() && performance.now() < deadline) {
+      const i = next++;
+      if (i >= generated.length) return;
+      // Coordinate drills (signed coordinates, sign-flipping answers) don't
+      // survive the number-preservation validator and aren't word-problem
+      // material — skip the AI call entirely and keep the plain prompt.
+      if (generated[i].format.reskinnable === false) continue;
+      const q = generated[i].question;
+      const text = await withBudget(
+        reskinQuestion(q, interests),
+        RESKIN_BUDGET_MS,
+        q.basePrompt,
+      );
+      out[i] = { ...generated[i], displayPrompt: text };
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(RESKIN_CONCURRENCY, generated.length) }, worker),
+  );
+  return out;
 }
 
 type Status = 'loading' | 'running' | 'results' | 'empty' | 'error';
@@ -83,16 +146,15 @@ export function ReviewPage() {
   // once tapped and closes again after a hint is shown.
   const [askOpen, setAskOpen] = useState(false);
   const [struggle, setStruggle] = useState('');
-  // Reskinned prompt text keyed by question index. Filled lazily; a missing
-  // entry simply means "show the plain basePrompt".
-  const [reskins, setReskins] = useState<Record<number, string>>({});
 
   const loadedRef = useRef(false);
   const flagsRef = useRef<QuestionFlags>(freshFlags());
   const lastWrongRef = useRef<number | undefined>(undefined);
-  // Indices whose reskin has already been requested — dedupes across renders
-  // and React StrictMode's double-invoked effects.
-  const reskinStartedRef = useRef<Set<number>>(new Set());
+  // Interests feed the reskin theming. Read through a ref so the one-shot build
+  // effect doesn't list `interests` as a dependency: a later profile/progress
+  // snapshot must not restart the build and re-fire AI calls mid-flight.
+  const interestsRef = useRef(interests);
+  interestsRef.current = interests;
 
   // The realtime progress listener keeps pushing fresh snapshots, so `progress`
   // changes reference well after the page mounts. We read it through a ref so a
@@ -108,13 +170,41 @@ export function ReviewPage() {
   useEffect(() => {
     if (loading || !user || loadedRef.current) return;
     let active = true;
+    const uid = user.uid;
 
     (async () => {
       const t0 = performance.now();
       const since = () => `${Math.round(performance.now() - t0)}ms`;
       try {
+        // 1) Instant restore — a saved, unfinished session resumes exactly where
+        // the learner left off (same numbers, same reskins, same position) with
+        // no regeneration and no AI calls.
+        const saved = loadSession(uid);
+        if (saved && saved.index < saved.items.length) {
+          const byId = new Map(REVIEW_FORMATS.map((f) => [f.formatId, f]));
+          const restored: SessionQuestion[] = saved.items.map((it) => ({
+            format: byId.get(it.formatId)!,
+            question: it.question,
+            displayPrompt: it.displayPrompt,
+          }));
+          loadedRef.current = true;
+          setQuestions(restored);
+          setResults(saved.results);
+          setIndex(saved.index);
+          setStatus('running');
+          console.info(
+            `[review] restored saved session (question ${saved.index + 1}/${restored.length}) in ${since()}`,
+          );
+          return;
+        }
+        if (saved) {
+          // A completed session lingered — drop it and build fresh.
+          clearSession();
+        }
+
+        // 2) Build a new session: select formats and generate all numbers.
         console.info('[review] start: fetching concept-mastery records…');
-        const history = await fetchConceptMastery(user.uid);
+        const history = await fetchConceptMastery(uid);
         console.info(
           `[review] history fetched in ${since()} (${Object.keys(history).length} records)`,
         );
@@ -127,22 +217,60 @@ export function ReviewPage() {
           count: SESSION_COUNT,
           now: Date.now(),
         });
-        const built: SessionQuestion[] = selected.map((format) => ({
+        const generated = selected.map((format) => ({
           format,
           question: format.generate(),
         }));
-        console.info(`[review] selected ${built.length} questions for this session`);
+        console.info(`[review] selected ${generated.length} questions for this session`);
+
+        if (generated.length === 0) {
+          if (!active) return;
+          loadedRef.current = true;
+          console.info('[review] no questions → status: empty');
+          setStatus('empty');
+          return;
+        }
+
+        // 3) Load all reskins up front (bounded concurrency + phase deadline).
+        // Each resolves to its own basePrompt on timeout/validation-failure/
+        // error, so the fallback is decided here — before the learner ever sees
+        // the question — and never swaps in later.
+        console.info(`[review] reskinning all ${generated.length} questions…`);
+        const seeded: SessionQuestion[] = generated.map((q) => ({
+          ...q,
+          displayPrompt: q.question.basePrompt,
+        }));
+        const built = await loadReskins(
+          seeded,
+          interestsRef.current,
+          () => active,
+        );
+        const reskinnedCount = built.filter(
+          (q) => q.displayPrompt !== q.question.basePrompt,
+        ).length;
+        console.info(
+          `[review] reskins resolved: ${reskinnedCount}/${built.length} applied (${since()})`,
+        );
 
         if (!active) {
           console.info('[review] load superseded before commit — skipping');
           return;
         }
+
+        // 4) Save the finalized session, then let the learner answer.
+        saveSession({
+          version: 1,
+          uid,
+          createdAt: Date.now(),
+          items: built.map((q) => ({
+            formatId: q.format.formatId,
+            question: q.question,
+            displayPrompt: q.displayPrompt,
+          })),
+          index: 0,
+          results: [],
+        });
         loadedRef.current = true;
-        if (built.length === 0) {
-          console.info('[review] no questions → status: empty');
-          setStatus('empty');
-          return;
-        }
         setQuestions(built);
         setStatus('running');
         console.info(`[review] status: running (total ${since()})`);
@@ -157,48 +285,21 @@ export function ReviewPage() {
     };
   }, [loading, user]);
 
-  // Lazily reskin the current question and prefetch the next one. This makes at
-  // most ~2 AI calls at a time and spreads them across the session, instead of
-  // bursting all five up-front and tripping the free-tier rate limit (5 rpm).
-  useEffect(() => {
-    if (status !== 'running' || questions.length === 0) return;
-
-    const ensureReskin = (i: number) => {
-      if (i < 0 || i >= questions.length) return;
-      if (reskinStartedRef.current.has(i)) return;
-      reskinStartedRef.current.add(i);
-      const q = questions[i].question;
-      console.info(`[review] reskinning question ${i} (${q.formatId})…`);
-      void withBudget(
-        reskinQuestion(q, interests),
-        RESKIN_BUDGET_MS,
-        q.basePrompt,
-      ).then((text) => {
-        if (text && text !== q.basePrompt) {
-          console.info(`[review] reskin applied for question ${i}`);
-          setReskins((prev) => ({ ...prev, [i]: text }));
-        }
-      });
-    };
-
-    ensureReskin(index);
-    ensureReskin(index + 1);
-  }, [status, index, questions, interests]);
-
   const current = questions[index];
 
-  // Override the displayed prompt with the reskin when one is ready; the graded
-  // answer lives elsewhere on the step and is never touched.
+  // The display prompt is frozen on each question at build/restore time, so the
+  // shown prompt is stable for the life of the question. The graded answer lives
+  // elsewhere on the step and is never touched.
   const currentStep = useMemo(() => {
     if (!current) return null;
-    const text = reskins[index];
-    if (!text) return current.question.step;
+    const text = current.displayPrompt;
+    if (!text || text === current.question.basePrompt) return current.question.step;
     const step = { ...current.question.step, prompt: text };
     if (step.subSteps && step.subSteps.length === 1) {
       step.subSteps = [{ ...step.subSteps[0], prompt: text }];
     }
     return step;
-  }, [current, reskins, index]);
+  }, [current]);
 
   const handleAttempt = (correct: boolean, value: number) => {
     if (!current) return;
@@ -214,7 +315,10 @@ export function ReviewPage() {
   const handleCorrect = () => {
     if (!current) return;
     const item = buildResultItem(current.format, flagsRef.current);
-    setResults((prev) => [...prev, item]);
+    const nextResults = [...results, item];
+    const nextIndex = index + 1;
+    const finished = nextIndex >= questions.length;
+    setResults(nextResults);
     // Record exactly one mastery outcome for this concept: correct only if the
     // learner solved it cleanly (no wrong attempt and no hint), matching the
     // results screen. A struggled question records a wrong flag.
@@ -228,15 +332,33 @@ export function ReviewPage() {
         // Persistence is best-effort; a failed write must not break the session.
       });
     }
+    // Persist progress so a reload resumes in place; clear once finished so the
+    // next visit builds a fresh session.
+    if (finished) {
+      clearSession();
+    } else if (user) {
+      saveSession({
+        version: 1,
+        uid: user.uid,
+        createdAt: Date.now(),
+        items: questions.map((q) => ({
+          formatId: q.format.formatId,
+          question: q.question,
+          displayPrompt: q.displayPrompt,
+        })),
+        index: nextIndex,
+        results: nextResults,
+      });
+    }
     flagsRef.current = freshFlags();
     lastWrongRef.current = undefined;
     setHint(null);
     setAskOpen(false);
     setStruggle('');
-    if (index + 1 >= questions.length) {
+    if (finished) {
       setStatus('results');
     } else {
-      setIndex((i) => i + 1);
+      setIndex(nextIndex);
     }
   };
 

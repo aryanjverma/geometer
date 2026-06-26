@@ -338,6 +338,7 @@ const distTwoPoints = make(
   {
     formatId: 'dist-two-points',
     lessonId: DIST,
+    reskinnable: false,
     sourceStepId: 'q1-distance',
     label: 'Distance between two points',
   },
@@ -386,6 +387,7 @@ const distPerimeter = make(
   {
     formatId: 'dist-perimeter',
     lessonId: DIST,
+    reskinnable: false,
     sourceStepId: 'q2-perimeter',
     label: 'Perimeter of a coordinate triangle',
   },
@@ -457,6 +459,7 @@ const transformTranslate = make(
   {
     formatId: 'transform-translate',
     lessonId: TRANS,
+    reskinnable: false,
     sourceStepId: 'q5-translate-point',
     label: 'Translate a point',
   },
@@ -486,6 +489,7 @@ const transformReflect = make(
   {
     formatId: 'transform-reflect',
     lessonId: TRANS,
+    reskinnable: false,
     sourceStepId: 'q6-reflect-point',
     label: 'Reflect a point',
   },
@@ -514,6 +518,7 @@ const transformRotate = make(
   {
     formatId: 'transform-rotate',
     lessonId: TRANS,
+    reskinnable: false,
     sourceStepId: 'q7-rotate-point',
     label: 'Rotate a point',
   },
@@ -544,6 +549,7 @@ const transformDilate = make(
   {
     formatId: 'transform-dilate',
     lessonId: TRANS,
+    reskinnable: false,
     sourceStepId: 'q8-dilate-point',
     label: 'Dilate a point',
   },

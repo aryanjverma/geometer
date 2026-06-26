@@ -1,5 +1,8 @@
-import { conceptsForLesson } from '@/content/concepts';
+import { CONCEPTS_BY_LESSON, conceptsForLesson } from '@/content/concepts';
+import { getLessonMeta, type LessonMeta } from '@/content/lessons';
+import { completedInScopeLessons } from '@/services/reviewSession';
 import type { Concept, MasteryLevel } from '@/types/mastery';
+import type { UserProgress } from '@/types/progress';
 import { makeQuestionId, type ConceptMasteryMap } from '@/types/review';
 
 /**
@@ -35,4 +38,75 @@ export function lessonConceptMasteries(
       history[makeQuestionId(lessonId, concept.stepId)]?.recentCorrect ?? [];
     return { concept, level: masteryLevel(recentCorrect) };
   });
+}
+
+/** Numeric weight of a mastery level: mastered=2, learning=1, need-review=0. */
+export function masteryScore(level: MasteryLevel): number {
+  if (level === 'mastered') return 2;
+  if (level === 'learning') return 1;
+  return 0;
+}
+
+/** Mastery levels for every concept in the catalog, in lesson/concept order. */
+export function allConceptMasteries(
+  history: ConceptMasteryMap,
+): Array<{ concept: Concept; level: MasteryLevel }> {
+  return Object.keys(CONCEPTS_BY_LESSON).flatMap((lessonId) =>
+    lessonConceptMasteries(lessonId, history),
+  );
+}
+
+/**
+ * Overall mastery percent across all catalog concepts. Each concept scores 0-2
+ * and 100% means every concept is mastered. Returns 0 when there are no
+ * concepts.
+ */
+export function masteryPercent(history: ConceptMasteryMap): number {
+  const all = allConceptMasteries(history);
+  if (all.length === 0) return 0;
+  const sum = all.reduce((n, { level }) => n + masteryScore(level), 0);
+  return Math.round((sum / (2 * all.length)) * 100);
+}
+
+/** Counts of concepts at each mastery level across the whole catalog. */
+export function masteryTotals(history: ConceptMasteryMap): {
+  mastered: number;
+  learning: number;
+  needReview: number;
+} {
+  return allConceptMasteries(history).reduce(
+    (acc, { level }) => {
+      if (level === 'mastered') acc.mastered += 1;
+      else if (level === 'learning') acc.learning += 1;
+      else acc.needReview += 1;
+      return acc;
+    },
+    { mastered: 0, learning: 0, needReview: 0 },
+  );
+}
+
+/**
+ * Among the completed in-scope lessons, the one with the lowest average concept
+ * mastery score (ties broken by lesson order). Returns null when no in-scope
+ * lesson has been completed yet.
+ */
+export function lowestMasteryLesson(
+  progress: UserProgress,
+  history: ConceptMasteryMap,
+): LessonMeta | null {
+  const completed = completedInScopeLessons(progress);
+  let best: { meta: LessonMeta; avg: number } | null = null;
+  for (const lessonId of completed) {
+    const meta = getLessonMeta(lessonId);
+    if (!meta) continue;
+    const masteries = lessonConceptMasteries(lessonId, history);
+    if (masteries.length === 0) continue;
+    const avg =
+      masteries.reduce((n, { level }) => n + masteryScore(level), 0) /
+      masteries.length;
+    if (best === null || avg < best.avg) {
+      best = { meta, avg };
+    }
+  }
+  return best?.meta ?? null;
 }

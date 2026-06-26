@@ -47,6 +47,14 @@ export interface QuestionFormat {
   sourceStepId: string;
   /** Human concept label, e.g. "Find the hypotenuse". */
   label: string;
+  /**
+   * Whether this format's prompt may be AI-reskinned into an interest-themed
+   * word problem. Defaults to true. Set false for abstract coordinate drills
+   * (e.g. "the point (3, 5) rotated 90 degrees…") whose signed coordinates and
+   * sign-flipping answers don't survive the number-preservation validator and
+   * don't read as real-world word problems anyway.
+   */
+  reskinnable?: boolean;
   /** Produce a fresh, solved question. `rng` defaults to Math.random. */
   generate(rng?: () => number): GeneratedQuestion;
 }

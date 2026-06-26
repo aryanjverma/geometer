@@ -34,7 +34,7 @@ export const LESSONS: LessonMeta[] = [
     lessonId: 'distance-coordinate-plane',
     title: 'Distance on the Coordinate Plane',
     description:
-      'Use the Pythagorean theorem to measure distance between points — watch the right triangle draw itself on the grid, then solve distance, perimeter, and route problems.',
+      'Use the Pythagorean theorem to measure distance between points, then solve distance, perimeter, and route problems.',
     requires: 'non-right-triangles',
     lesson: distanceLesson,
   },

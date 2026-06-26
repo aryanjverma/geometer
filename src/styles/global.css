@@ -46,17 +46,17 @@ h3 {
   margin: auto;
 }
 
-.dashboard-page,
 .account-page {
   text-align: center;
 }
 
 .dashboard-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.25rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.section-heading {
+  margin: 1.75rem 0 0.75rem;
+  font-size: 1.25rem;
 }
 
 .brand-wordmark {
@@ -69,6 +69,7 @@ h3 {
   margin: 0;
   color: var(--muted);
   font-weight: 600;
+  font-size: 1.35rem;
 }
 
 .page-center {
@@ -92,6 +93,43 @@ h3 {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+}
+
+/* Brand block shared by the side nav and mobile top header. */
+.brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: inherit;
+}
+
+.brand-link-name {
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -0.03em;
+}
+
+/* Mobile-only slim top header. */
+.top-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  background: var(--surface);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* Laptop-only side navigation; hidden by default (mobile-first). */
+.side-nav {
+  display: none;
+}
+
+.side-nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .bottom-nav {
@@ -304,6 +342,28 @@ h3 {
 
 .lesson-card h2 {
   margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1.3;
+  /* Reserve room for two lines so single- and double-line titles align the
+     content that follows. */
+  min-height: calc(1.3em * 2);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* Reserve a fixed amount of space for descriptions so cards stay the same
+   height regardless of how long each lesson summary is. */
+.lesson-card-desc {
+  line-height: 1.5;
+  min-height: calc(1.5em * 4);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
 }
 
 /* --- Concept mastery overview (collapsed summary on the card) --- */
@@ -1334,4 +1394,188 @@ h3 {
   padding: 0.25rem 0.75rem;
   font-size: 0.8125rem;
   font-weight: 600;
+}
+
+/* --- Dashboard redesign: stat strip, review row, suggested review --- */
+
+.mastery-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-tile {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  text-align: left;
+}
+
+.stat-tile-mastery {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.stat-tile-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.stat-tile-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.stat-tile-mastery .progress-track {
+  margin-top: 0.25rem;
+}
+
+.stat-tile-counts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.stat-count {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  padding: 0.5rem 0.25rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+}
+
+.stat-count-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-count-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.streak-widget {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 0.5rem;
+  background: linear-gradient(135deg, #fff7ed, #ffedd5);
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+}
+
+.streak-widget .streak-flame {
+  grid-row: 1 / span 2;
+  font-size: 1.75rem;
+}
+
+.streak-widget-count {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.streak-widget-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #ea580c;
+}
+
+.streak-widget-cta {
+  grid-column: 1 / -1;
+  margin-top: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+.review-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.review-row .review-card {
+  margin-bottom: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.review-row .review-card .review-card-summary {
+  flex: 1;
+}
+
+.suggested-review-empty .review-card-summary {
+  margin-bottom: 0;
+}
+
+/* --- Laptop layout: side nav, wider dashboard, horizontal lessons --- */
+@media (min-width: 960px) {
+  .app-shell {
+    flex-direction: row;
+  }
+
+  .top-header {
+    display: none;
+  }
+
+  .bottom-nav {
+    display: none;
+  }
+
+  .side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    flex: 0 0 220px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100dvh;
+    padding: 1.5rem 1rem;
+    background: var(--surface);
+    border-right: 1px solid #e2e8f0;
+  }
+
+  .side-nav .nav-link {
+    flex: none;
+    text-align: left;
+  }
+
+  .page {
+    padding-bottom: 2.5rem;
+  }
+
+  .dashboard-page {
+    max-width: 1040px;
+    text-align: left;
+  }
+
+  .mastery-stats {
+    grid-template-columns: 1.2fr 2fr 1.4fr;
+    align-items: stretch;
+  }
+
+  .review-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .lesson-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    align-items: stretch;
+  }
 }

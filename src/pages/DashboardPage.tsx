@@ -1,7 +1,7 @@
-import { ProgressBar } from '@/components/dashboard/ProgressBar';
 import { LessonCard } from '@/components/dashboard/LessonCard';
+import { MasteryStats } from '@/components/dashboard/MasteryStats';
 import { ReviewSessionCard } from '@/components/dashboard/ReviewSessionCard';
-import { GeometerAvatar } from '@/components/GeometerAvatar';
+import { SuggestedReviewCard } from '@/components/dashboard/SuggestedReviewCard';
 import { LESSONS } from '@/content/lessons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/contexts/ProgressContext';
@@ -31,17 +31,19 @@ export function DashboardPage() {
   return (
     <div className="page dashboard-page">
       <header className="dashboard-header">
-        <GeometerAvatar size={56} />
-        <h1 className="brand-wordmark">Geometer</h1>
-        <p className="dashboard-greeting">{percent > 0 ? 'Welcome back' : 'Hello'}, {name}</p>
-        <div className="streak-badge" title="Daily streak">
-          <span className="streak-flame" aria-hidden="true">{'\u{1F525}'}</span>
-          <span className="streak-count">{streak}</span>
-          <span className="streak-label">day{streak === 1 ? '' : 's'}</span>
-        </div>
+        <p className="dashboard-greeting">
+          {percent > 0 ? 'Welcome back' : 'Hello'}, {name}
+        </p>
       </header>
-      <ProgressBar percent={percent} label="Course progress" />
-      <ReviewSessionCard progress={progress} />
+
+      <MasteryStats conceptMastery={conceptMastery} streak={streak} />
+
+      <div className="review-row">
+        <ReviewSessionCard progress={progress} />
+        <SuggestedReviewCard progress={progress} conceptMastery={conceptMastery} />
+      </div>
+
+      <h2 className="section-heading">Lessons</h2>
       <div className="lesson-list">
         {LESSONS.map((meta) => (
           <LessonCard
