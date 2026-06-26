@@ -19,12 +19,17 @@ import type { GeneratedQuestion, ReviewResultItem } from '@/types/review';
 const STORAGE_KEY = 'geometer.review.session';
 const VERSION = 1 as const;
 
-/** One frozen question: the format reference (by id), its numbers, and the
- * display prompt (an applied reskin or the plain `basePrompt`). */
+/** One frozen question: the format reference (by id), its numbers, the
+ * display prompt (an applied reskin or the plain `basePrompt`), and the most
+ * recent Ask Geometer hint shown for it (if any). Persisting the hint means a
+ * reload mid-question restores the exact guidance the learner already saw —
+ * no re-asking and no extra AI call. */
 export interface PersistedSessionItem {
   formatId: string;
   question: GeneratedQuestion;
   displayPrompt: string;
+  /** The Ask Geometer hint last shown for this question, or null if none. */
+  hint?: string | null;
 }
 
 /** A complete, resumable review session snapshot. */
@@ -59,7 +64,8 @@ function itemsAreValid(items: PersistedSessionItem[]): boolean {
         typeof it.formatId === 'string' &&
         known.has(it.formatId) &&
         it.question != null &&
-        typeof it.displayPrompt === 'string',
+        typeof it.displayPrompt === 'string' &&
+        (it.hint == null || typeof it.hint === 'string'),
     )
   );
 }

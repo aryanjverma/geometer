@@ -71,6 +71,9 @@ interface SessionQuestion {
   /** Frozen prompt shown to the learner: an applied reskin, or the plain
    * `basePrompt` when no reskin loaded. Resolved once, up front. */
   displayPrompt: string;
+  /** The latest Ask Geometer hint shown for this question, persisted so a
+   * reload restores it without re-asking. `null` until one is requested. */
+  hint?: string | null;
 }
 
 /**
@@ -186,11 +189,20 @@ export function ReviewPage() {
             format: byId.get(it.formatId)!,
             question: it.question,
             displayPrompt: it.displayPrompt,
+            hint: it.hint ?? null,
           }));
           loadedRef.current = true;
           setQuestions(restored);
           setResults(saved.results);
           setIndex(saved.index);
+          // Restore the hint the learner was already shown for the current
+          // question (if any) and re-flag it as hint-used so mastery stays
+          // accurate across the reload.
+          const restoredHint = restored[saved.index]?.hint ?? null;
+          if (restoredHint) {
+            setHint(restoredHint);
+            flagsRef.current.hintUsed = true;
+          }
           setStatus('running');
           console.info(
             `[review] restored saved session (question ${saved.index + 1}/${restored.length}) in ${since()}`,
@@ -266,6 +278,7 @@ export function ReviewPage() {
             formatId: q.format.formatId,
             question: q.question,
             displayPrompt: q.displayPrompt,
+            hint: q.hint ?? null,
           })),
           index: 0,
           results: [],
@@ -345,6 +358,7 @@ export function ReviewPage() {
           formatId: q.format.formatId,
           question: q.question,
           displayPrompt: q.displayPrompt,
+          hint: q.hint ?? null,
         })),
         index: nextIndex,
         results: nextResults,
@@ -389,6 +403,27 @@ export function ReviewPage() {
         `[review] hint ready in ${Math.round(performance.now() - t0)}ms`,
       );
       setHint(text);
+      // Attach the hint to its question and persist, so a reload restores the
+      // same guidance (and the hint-used flag) without another AI call.
+      const withHint = questions.map((q, i) =>
+        i === index ? { ...q, hint: text } : q,
+      );
+      setQuestions(withHint);
+      if (user) {
+        saveSession({
+          version: 1,
+          uid: user.uid,
+          createdAt: Date.now(),
+          items: withHint.map((q) => ({
+            formatId: q.format.formatId,
+            question: q.question,
+            displayPrompt: q.displayPrompt,
+            hint: q.hint ?? null,
+          })),
+          index,
+          results,
+        });
+      }
       // Single round: close the input and drop the struggle text once answered.
       setAskOpen(false);
       setStruggle('');
