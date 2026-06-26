@@ -23,7 +23,8 @@ type StepType =
   | 'similarity-guided'
   | 'congruence-check'
   | 'similarity-check'
-  | 'shape-match';
+  | 'shape-match'
+  | 'coordinate-rule';
 
 interface StepFeedback {
   correct?: string;

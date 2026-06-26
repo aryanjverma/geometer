@@ -490,6 +490,31 @@ const steps: AuthoredStep[] = [
         'After dilating by $2$ and translating, the source matches the target, confirming the triangles are similar.',
     },
   },
+  {
+    id: 'q5-side-length',
+    type: 'coordinate-rule',
+    tag: 'You do',
+    prompt: 'A right triangle has legs of length 3 and 4. How long is its hypotenuse?',
+    answer: 5,
+    feedback: {
+      correct: 'By the Pythagorean theorem, $\\sqrt{3^2 + 4^2} = 5$.',
+      wrong: 'Square each leg, add them, then take the square root.',
+      hint: 'Use $c = \\sqrt{a^2 + b^2}$ with the two given legs.',
+    },
+  },
+  {
+    id: 'q6-scale-ratio',
+    type: 'coordinate-rule',
+    tag: 'You do',
+    prompt:
+      'Two similar figures have corresponding sides of length 4 and 12. The larger figure is a scaled copy of the smaller. What is the scale factor?',
+    answer: 3,
+    feedback: {
+      correct: 'Divide the larger side by the smaller: $12 \\div 4 = 3$.',
+      wrong: 'Divide a side of the larger figure by the corresponding side of the smaller figure.',
+      hint: 'The scale factor is the larger side divided by the smaller side.',
+    },
+  },
 ];
 
 export const congruenceSimilarityLesson: Lesson = {

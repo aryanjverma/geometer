@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { updateProfile } from 'firebase/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/contexts/ProgressContext';
+import { parseInterests, serializeInterests } from '@/services/reviewSession';
 
 const AVATAR_OPTIONS = ['🟣', '🔵', '🟢', '🟡', '🔴', '⭐', '📐', '🎯'];
 
@@ -13,6 +14,7 @@ export function AccountPage() {
 
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('📐');
+  const [interestsText, setInterestsText] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -20,12 +22,20 @@ export function AccountPage() {
   useEffect(() => {
     setName(profile?.displayName ?? user?.displayName ?? '');
     setAvatar(profile?.photoURL?.startsWith('emoji:') ? profile.photoURL.slice(6) : '📐');
+    setInterestsText(serializeInterests(profile?.interests ?? []));
   }, [profile, user]);
+
+  const interests = parseInterests(interestsText);
 
   const handleSave = async () => {
     if (!user) return;
     await updateProfile(user, { displayName: name });
-    await saveProfile({ displayName: name, photoURL: `emoji:${avatar}` });
+    await saveProfile({
+      ...profile,
+      displayName: name,
+      photoURL: `emoji:${avatar}`,
+      interests,
+    });
     setMessage('Profile saved.');
   };
 
@@ -79,6 +89,30 @@ export function AccountPage() {
           ))}
         </div>
       </fieldset>
+
+      <label className="field">
+        <span>Interests</span>
+        <input
+          type="text"
+          value={interestsText}
+          onChange={(e) => setInterestsText(e.target.value)}
+          className="text-input"
+          placeholder="basketball, video games, cooking"
+          aria-describedby="interests-help"
+        />
+      </label>
+      <p id="interests-help" className="muted interests-help">
+        Comma-separated. We use these to theme your review word problems. Leave blank for a mix.
+      </p>
+      {interests.length > 0 && (
+        <div className="interest-chips" aria-hidden="true">
+          {interests.map((tag) => (
+            <span key={tag.toLowerCase()} className="interest-chip">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
 
       <button type="button" className="btn btn-primary" onClick={handleSave}>
         Save profile

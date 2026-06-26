@@ -419,5 +419,57 @@ export const transformationsLesson: Lesson = {
         hint: 'Multiply each coordinate by 2 first, then shift those vertices 1 right and 1 down.',
       },
     },
+    {
+      id: 'q5-translate-point',
+      type: 'coordinate-rule',
+      tag: 'You do',
+      prompt:
+        'The point (2, 3) is translated by the vector (4, -1). What is the x-coordinate of its image?',
+      answer: 6,
+      feedback: {
+        correct: 'Add the shift to the x-coordinate: $2 + 4 = 6$.',
+        wrong: 'A translation adds the shift to each coordinate; add the x-shift to the x-coordinate.',
+        hint: 'To translate, add the horizontal shift to the x-coordinate.',
+      },
+    },
+    {
+      id: 'q6-reflect-point',
+      type: 'coordinate-rule',
+      tag: 'You do',
+      prompt:
+        'The point (3, 5) is reflected across the y-axis. What is the x-coordinate of its image?',
+      answer: -3,
+      feedback: {
+        correct: 'Reflecting across the y-axis negates x: $(3, 5) \\rightarrow (-3, 5)$.',
+        wrong: 'Reflecting across the y-axis keeps y the same and negates the x-coordinate.',
+        hint: 'Across the y-axis, the x-coordinate changes sign and y stays put.',
+      },
+    },
+    {
+      id: 'q7-rotate-point',
+      type: 'coordinate-rule',
+      tag: 'You do',
+      prompt:
+        'The point (2, 4) is rotated 90 degrees counterclockwise about the origin. What is the x-coordinate of its image?',
+      answer: -4,
+      feedback: {
+        correct: 'A 90-degree counterclockwise rotation sends the x-coordinate to -4.',
+        wrong: 'Use the rotation rules: 90 maps (x, y) to (-y, x); 180 to (-x, -y); 270 to (y, -x).',
+        hint: 'Apply the quarter-turn rule for the given angle, then read off the new x-coordinate.',
+      },
+    },
+    {
+      id: 'q8-dilate-point',
+      type: 'coordinate-rule',
+      tag: 'You do',
+      prompt:
+        'The point (3, 2) is dilated by a factor of 3 from the origin. What is the x-coordinate of its image?',
+      answer: 9,
+      feedback: {
+        correct: 'Multiply the x-coordinate by the scale factor: $3 \\times 3 = 9$.',
+        wrong: 'A dilation from the origin multiplies each coordinate by the scale factor.',
+        hint: 'Multiply the x-coordinate by the scale factor.',
+      },
+    },
   ],
 };

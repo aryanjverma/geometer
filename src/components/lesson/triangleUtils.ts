@@ -8,9 +8,14 @@ const MAX_SCALE = 28;
 export function computeScale(lengths: [number, number, number]): number {
   const total = lengths[0] + lengths[1] + lengths[2];
   const maxSide = Math.max(...lengths);
+  // Width must hold the fully-unwrapped chain; height must hold the tallest
+  // side when the triangle is folded (or a handle is swung straight up).
   const scaleW = (STAGE_W - ORIGIN_X - 30) / total;
   const scaleH = (ORIGIN_Y - 30) / maxSide;
-  return Math.max(8, Math.min(MAX_SCALE, scaleW, scaleH));
+  // Cap at MAX_SCALE so small triangles aren't huge, but never floor the value:
+  // large triples (e.g. 9-40-41) need to shrink below any minimum to stay on
+  // the stage, so the limiting fit dimension always wins.
+  return Math.min(MAX_SCALE, scaleW, scaleH);
 }
 
 export function sidePoints(

@@ -1,0 +1,31 @@
+---
+description: Terminal/shell conventions for this Windows + PowerShell environment
+alwaysApply: true
+---
+
+# Shell is PowerShell on Windows
+
+The integrated terminal is **PowerShell on Windows**. Unix/Git-Bash-only
+commands are NOT available. Do not pipe to or call them.
+
+## Not available — do not use
+
+`tail`, `head`, `cat`, `grep`, `sed`, `awk`, `ls -la`, `which`, `rm -rf`,
+`touch`, `export VAR=...`, `&&`-chained POSIX one-liners that assume bash.
+
+## Use instead
+
+| Goal | Don't | Do |
+|------|-------|----|
+| Last N lines | `... \| tail -40` | `... \| Select-Object -Last 40` |
+| First N lines | `... \| head -20` | `... \| Select-Object -First 20` |
+| Read a file | `cat file` | Use the Read tool (preferred) |
+| Find in files | `grep foo` | Use the Grep tool (preferred) |
+| Set env var | `export X=1` | `$env:X = "1"` |
+| Chain commands | `a && b` | `a; b` or separate calls |
+
+## Prefer tools over shell
+
+For reading, searching, and editing files, use the dedicated tools (Read,
+Grep, Glob, StrReplace) instead of shell commands. Reserve the terminal for
+real system operations (npm, git, vitest, etc.).

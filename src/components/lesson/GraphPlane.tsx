@@ -38,18 +38,22 @@ export function GraphPlane({
 
   const spanX = xMax - xMin;
   const spanY = yMax - yMin;
-  // Square cells: one unit is the same pixel size on both axes.
-  const unit = 300 / Math.max(spanX, spanY);
+  // Keep the plot a roughly fixed square footprint and let each axis pick its
+  // own unit size, so lopsided point ranges (e.g. a tall, narrow span) still
+  // fill a readable square instead of collapsing into a thin strip.
+  const PLOT = 300;
+  const unitX = PLOT / spanX;
+  const unitY = PLOT / spanY;
   const pad = 26;
 
-  const plotW = spanX * unit;
-  const plotH = spanY * unit;
+  const plotW = spanX * unitX;
+  const plotH = spanY * unitY;
   const w = plotW + pad * 2;
   const h = plotH + pad * 2;
 
   // Data -> screen mapping (SVG y grows downward, so invert).
-  const sx = (x: number) => pad + (x - xMin) * unit;
-  const sy = (y: number) => pad + (yMax - y) * unit;
+  const sx = (x: number) => pad + (x - xMin) * unitX;
+  const sy = (y: number) => pad + (yMax - y) * unitY;
 
   const byId = new Map(points.map((p) => [p.id, p]));
 

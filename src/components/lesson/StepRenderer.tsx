@@ -13,6 +13,7 @@ import { DistanceProblemStep } from './DistanceProblemStep';
 import { TransformStep } from './TransformStep';
 import { ShapeMatchStep } from './ShapeMatchStep';
 import { GridCheckStep } from './GridCheckStep';
+import { StaticGrid, gridShapes } from './StaticGrid';
 import { MathText } from '@/components/MathText';
 
 interface FeedbackState {
@@ -69,11 +70,18 @@ interface StepRendererProps {
   step: LessonStep;
   stepIndex: number;
   onCorrect: () => void;
+  /**
+   * Optional Phase 2 hook fired on each numeric submission of the step's FINAL
+   * answer (for multi-part / distance steps, only the last part/subStep fires).
+   * Backward compatible: omitting it preserves all Phase 1 grading and advance
+   * behavior. Used by the review runner to persist right/wrong attempts.
+   */
+  onAttempt?: (correct: boolean, value: number) => void;
 }
 
 const CELEBRATE_MS = 1200;
 
-export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) {
+export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRendererProps) {
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [unfolded, setUnfolded] = useState(false);
@@ -134,7 +142,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
   }
 
   if (step.type === 'distance-guided' || step.type === 'distance-problem') {
-    return <DistanceProblemStep step={step} onCorrect={onCorrect} />;
+    return <DistanceProblemStep step={step} onCorrect={onCorrect} onAttempt={onAttempt} />;
   }
 
   if (step.type === 'interactive-unfold' && step.triangle && 'legs' in step.triangle) {
@@ -156,11 +164,12 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
         <div className="answer-box">
           <NumericInput
             disabled={!unfolded}
-            onSubmit={(value) =>
-              value === step.answer
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
                 ? finishStep(step.feedback?.correct ?? 'Correct!')
-                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint)
-            }
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
           />
           {!unfolded && (
             <p className="muted hint-text">Unfold the triangle first, then enter the perimeter.</p>
@@ -188,6 +197,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
         <div className="answer-box">
           <NumericInput
             onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
               if (value === step.answer) {
                 return finishStep(step.feedback?.correct ?? 'Correct!');
               }
@@ -224,11 +234,12 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
         </div>
         <div className="answer-box">
           <NumericInput
-            onSubmit={(value) =>
-              value === step.answer
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
                 ? finishStep(step.feedback?.correct ?? 'Correct!')
-                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint)
-            }
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
           />
           {feedback && <AnswerFeedback {...feedback} />}
         </div>
@@ -290,11 +301,12 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
               <NumericInput
                 key="part-b"
                 disabled={!unfolded}
-                onSubmit={(value) =>
-                  value === partB?.answer
+                onSubmit={(value) => {
+                  onAttempt?.(value === partB?.answer, value);
+                  return value === partB?.answer
                     ? finishStep(partB?.feedback?.correct ?? 'Correct!')
-                    : handleWrong(partB?.feedback?.wrong ?? 'Try again.', partB?.feedback?.hint)
-                }
+                    : handleWrong(partB?.feedback?.wrong ?? 'Try again.', partB?.feedback?.hint);
+                }}
               />
               {!unfolded && (
                 <p className="muted hint-text">Unfold the triangle first, then enter the perimeter.</p>
@@ -345,11 +357,12 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
           ) : (
             <NumericInput
               key="part-b"
-              onSubmit={(value) =>
-                value === partB?.answer
-                  ? finishStep('½ × 8 × 6 = 24')
-                  : handleWrong(partB?.feedback?.wrong ?? 'Try again.')
-              }
+              onSubmit={(value) => {
+                onAttempt?.(value === partB?.answer, value);
+                return value === partB?.answer
+                  ? finishStep(partB?.feedback?.correct ?? 'Correct!')
+                  : handleWrong(partB?.feedback?.wrong ?? 'Try again.');
+              }}
             />
           )}
           {feedback && <AnswerFeedback {...feedback} />}
@@ -381,6 +394,7 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
         <div className="answer-box">
           <NumericInput
             onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
               if (value === step.answer) {
                 return finishStep(step.feedback?.correct ?? 'Correct!');
               }
@@ -420,11 +434,12 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
         </div>
         <div className="answer-box">
           <NumericInput
-            onSubmit={(value) =>
-              value === step.answer
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
                 ? finishStep(step.feedback?.correct ?? 'Correct!')
-                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint)
-            }
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
           />
           {feedback && <AnswerFeedback {...feedback} />}
         </div>
@@ -451,11 +466,12 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
         <div className="answer-box">
           <NumericInput
             disabled={!unfolded}
-            onSubmit={(value) =>
-              value === step.answer
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
                 ? finishStep(step.feedback?.correct ?? 'Correct!')
-                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint)
-            }
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
           />
           {!unfolded && (
             <p className="muted hint-text">Swipe the handle down to split the triangle first.</p>
@@ -487,11 +503,44 @@ export function StepRenderer({ step, stepIndex, onCorrect }: StepRendererProps) 
         </div>
         <div className="answer-box">
           <NumericInput
-            onSubmit={(value) =>
-              value === step.answer
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
                 ? finishStep(step.feedback?.correct ?? 'Correct!')
-                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint)
-            }
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
+          />
+          {feedback && <AnswerFeedback {...feedback} />}
+        </div>
+      </div>
+    );
+  }
+
+  if (step.type === 'coordinate-rule') {
+    const shapes = step.grid?.shapes?.length ? gridShapes(step.grid) : [];
+    return (
+      <div className="step-area">
+        {celebrate && <Confetti />}
+        <div className="question-box">
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
+          {step.grid && shapes.length > 0 && (
+            <StaticGrid
+              xMin={step.grid.xMin}
+              xMax={step.grid.xMax}
+              yMin={step.grid.yMin}
+              yMax={step.grid.yMax}
+              shapes={shapes}
+            />
+          )}
+        </div>
+        <div className="answer-box">
+          <NumericInput
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
+                ? finishStep(step.feedback?.correct ?? 'Correct!')
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
           />
           {feedback && <AnswerFeedback {...feedback} />}
         </div>

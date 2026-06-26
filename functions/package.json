@@ -1,0 +1,23 @@
+{
+  "name": "geometer-functions",
+  "description": "Cloud Functions for Geometer — secure OpenAI proxy for the review session",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "tsc --noEmit",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-functions": "^7.2.5",
+    "openai": "^6.45.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  }
+}

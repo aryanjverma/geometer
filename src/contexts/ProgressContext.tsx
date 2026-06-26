@@ -16,15 +16,19 @@ import {
   deleteUserData,
   resetProgress as resetProgressService,
 } from '@/services/progressService';
+import { subscribeConceptMastery } from '@/services/reviewService';
 import {
   emptyProgress,
   type UserProfile,
   type UserProgress,
 } from '@/types/progress';
+import type { ConceptMasteryMap } from '@/types/review';
 
 interface ProgressContextValue {
   progress: UserProgress;
   profile: UserProfile | null;
+  /** Live concept-mastery records, keyed by questionId. Updates independently. */
+  conceptMastery: ConceptMasteryMap;
   loading: boolean;
   setStep: (lessonId: string, step: number) => Promise<void>;
   completeLesson: (lessonId: string) => Promise<void>;
@@ -39,12 +43,14 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [progress, setProgress] = useState<UserProgress>(emptyProgress());
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [conceptMastery, setConceptMastery] = useState<ConceptMasteryMap>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) {
       setProgress(emptyProgress());
       setProfile(null);
+      setConceptMastery({});
       setLoading(false);
       return;
     }
@@ -74,7 +80,17 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         profileReady = true;
         settle();
       });
-    return unsub;
+    // Concept-mastery records stream in independently and never gate the
+    // initial loading state: they start empty and fill in live.
+    const unsubQuestions = subscribeConceptMastery(
+      user.uid,
+      setConceptMastery,
+      () => {},
+    );
+    return () => {
+      unsub();
+      unsubQuestions();
+    };
   }, [user]);
 
   const activityEntry = useCallback(
@@ -137,6 +153,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     () => ({
       progress,
       profile,
+      conceptMastery,
       loading,
       setStep,
       completeLesson,
@@ -144,7 +161,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
       resetProgress,
       wipeUserData,
     }),
-    [progress, profile, loading, setStep, completeLesson, updateProfile, resetProgress, wipeUserData],
+    [progress, profile, conceptMastery, loading, setStep, completeLesson, updateProfile, resetProgress, wipeUserData],
   );
 
   return (

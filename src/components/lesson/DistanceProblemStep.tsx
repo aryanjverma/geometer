@@ -12,6 +12,12 @@ interface FeedbackState {
 interface DistanceProblemStepProps {
   step: LessonStep;
   onCorrect: () => void;
+  /**
+   * Optional Phase 2 hook fired on each numeric submission of the FINAL
+   * subStep (the step's graded final answer). Backward compatible: omitting it
+   * leaves all Phase 1 grading and advance behavior untouched.
+   */
+  onAttempt?: (correct: boolean, value: number) => void;
 }
 
 const CELEBRATE_MS = 1200;
@@ -29,7 +35,7 @@ function numericMatches(sub: DistanceSubStep, values: number[]): boolean {
   return fields.every((f, i) => values[i] === f.answer);
 }
 
-export function DistanceProblemStep({ step, onCorrect }: DistanceProblemStepProps) {
+export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProblemStepProps) {
   const subSteps = step.subSteps ?? [];
   const graph = step.graph;
 
@@ -110,7 +116,11 @@ export function DistanceProblemStep({ step, onCorrect }: DistanceProblemStepProp
   const handleNumericSubmit = () => {
     const parsed = fields.map((_, i) => parseInt(values[i] ?? '', 10));
     if (parsed.some((n) => Number.isNaN(n))) return;
-    if (numericMatches(sub, parsed)) {
+    const correct = numericMatches(sub, parsed);
+    // Only the final subStep carries the question's graded answer, so attempts
+    // are reported there (and never for intermediate parts).
+    if (isLast) onAttempt?.(correct, parsed[parsed.length - 1]);
+    if (correct) {
       advanceAfterCorrect(sub.drawSegmentIds);
     } else {
       handleWrong();

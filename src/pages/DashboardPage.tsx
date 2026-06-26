@@ -1,10 +1,12 @@
 import { ProgressBar } from '@/components/dashboard/ProgressBar';
 import { LessonCard } from '@/components/dashboard/LessonCard';
+import { ReviewSessionCard } from '@/components/dashboard/ReviewSessionCard';
 import { GeometerAvatar } from '@/components/GeometerAvatar';
 import { LESSONS } from '@/content/lessons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/contexts/ProgressContext';
 import { getLessonButtonState, getProgressPercent } from '@/services/progressService';
+import { lessonConceptMasteries } from '@/services/masteryService';
 import { effectiveStreak, todayString } from '@/services/streakService';
 
 function firstName(name: string | null | undefined): string {
@@ -13,7 +15,7 @@ function firstName(name: string | null | undefined): string {
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const { progress, profile, loading } = useProgress();
+  const { progress, profile, conceptMastery, loading } = useProgress();
   const percent = getProgressPercent(progress, LESSONS.map((l) => l.lessonId));
   const name = firstName(profile?.displayName ?? user?.displayName);
   const streak = effectiveStreak(progress.streak, progress.lastActivityDate, todayString());
@@ -39,6 +41,7 @@ export function DashboardPage() {
         </div>
       </header>
       <ProgressBar percent={percent} label="Course progress" />
+      <ReviewSessionCard progress={progress} />
       <div className="lesson-list">
         {LESSONS.map((meta) => (
           <LessonCard
@@ -47,6 +50,7 @@ export function DashboardPage() {
             title={meta.title}
             description={meta.description}
             buttonState={getLessonButtonState(progress, meta.lessonId, meta.requires)}
+            concepts={lessonConceptMasteries(meta.lessonId, conceptMastery)}
           />
         ))}
       </div>

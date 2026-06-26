@@ -9,6 +9,7 @@ import { DashboardPage } from '@/pages/DashboardPage';
 import { LeaderboardPage } from '@/pages/LeaderboardPage';
 import { AccountPage } from '@/pages/AccountPage';
 import { LessonPage } from '@/pages/LessonPage';
+import { ReviewPage } from '@/pages/ReviewPage';
 
 export default function App() {
   return (
@@ -43,6 +44,15 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <LessonPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/review"
+              element={
+                <ProtectedRoute>
+                  <ReviewPage />
                 </ProtectedRoute>
               }
             />

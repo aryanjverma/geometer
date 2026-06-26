@@ -14,6 +14,8 @@ export interface UserProgress {
 export interface UserProfile {
   displayName: string;
   photoURL: string;
+  /** Interest tags used to theme AI word-problem reskins (Phase 2). */
+  interests?: string[];
 }
 
 /** A single row in the streak leaderboard (denormalized for cross-user reads). */

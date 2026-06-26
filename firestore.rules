@@ -8,11 +8,30 @@ service cloud.firestore {
     match /users/{userId}/data/profile {
       allow read, delete: if isOwner(userId);
       allow create, update: if isOwner(userId)
-        && request.resource.data.keys().hasOnly(['displayName', 'photoURL'])
+        && request.resource.data.keys().hasOnly(['displayName', 'photoURL', 'interests'])
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() <= 100
         && request.resource.data.photoURL is string
-        && request.resource.data.photoURL.size() <= 300;
+        && request.resource.data.photoURL.size() <= 300
+        && (!('interests' in request.resource.data)
+            || (request.resource.data.interests is list
+                && request.resource.data.interests.size() <= 20));
+    }
+
+    // Per-concept mastery records. Each doc id is "lessonId__stepId".
+    match /users/{userId}/conceptMastery/{conceptId} {
+      allow read, delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.keys().hasOnly([
+            'lessonId', 'stepId', 'recentCorrect', 'lastReviewedAt'
+          ])
+        && request.resource.data.lessonId is string
+        && request.resource.data.lessonId.size() <= 100
+        && request.resource.data.stepId is string
+        && request.resource.data.stepId.size() <= 100
+        && request.resource.data.recentCorrect is list
+        && request.resource.data.recentCorrect.size() <= 2
+        && request.resource.data.lastReviewedAt is int;
     }
 
     match /users/{userId}/data/progress {

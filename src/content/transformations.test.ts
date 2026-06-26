@@ -22,6 +22,10 @@ const EXPECTED_STEPS: Array<{ id: string; type: string }> = [
   { id: 'q1-combo', type: 'transform-problem' },
   { id: 'q2-combo', type: 'transform-problem' },
   { id: 'q3-combo', type: 'transform-problem' },
+  { id: 'q5-translate-point', type: 'coordinate-rule' },
+  { id: 'q6-reflect-point', type: 'coordinate-rule' },
+  { id: 'q7-rotate-point', type: 'coordinate-rule' },
+  { id: 'q8-dilate-point', type: 'coordinate-rule' },
 ];
 
 const EXPECTED_KIND: Record<string, TransformOp['kind']> = {
@@ -181,7 +185,15 @@ describe('transformations content', () => {
     ]) {
       expect(byId(id)?.tag).toBe('We do');
     }
-    for (const id of ['q1-combo', 'q2-combo', 'q3-combo']) {
+    for (const id of [
+      'q1-combo',
+      'q2-combo',
+      'q3-combo',
+      'q5-translate-point',
+      'q6-reflect-point',
+      'q7-rotate-point',
+      'q8-dilate-point',
+    ]) {
       expect(byId(id)?.tag).toBe('You do');
     }
   });

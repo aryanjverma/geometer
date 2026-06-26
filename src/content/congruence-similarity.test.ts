@@ -117,6 +117,8 @@ describe('congruence-similarity lesson', () => {
       { id: 'q2-similarity-check', type: 'similarity-check' },
       { id: 'q3-match-congruent', type: 'shape-match' },
       { id: 'q4-match-similar', type: 'shape-match' },
+      { id: 'q5-side-length', type: 'coordinate-rule' },
+      { id: 'q6-scale-ratio', type: 'coordinate-rule' },
     ];
     const actual = congruenceSimilarityLesson.steps.map((s) => ({
       id: s.id,
@@ -134,6 +136,8 @@ describe('congruence-similarity lesson', () => {
     expect(byId('q2-similarity-check')?.tag).toBe('You do');
     expect(byId('q3-match-congruent')?.tag).toBe('You do');
     expect(byId('q4-match-similar')?.tag).toBe('You do');
+    expect(byId('q5-side-length')?.tag).toBe('You do');
+    expect(byId('q6-scale-ratio')?.tag).toBe('You do');
   });
 
   it('gives every step a non-empty prompt', () => {
