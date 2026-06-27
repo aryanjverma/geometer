@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { LessonCard } from '@/components/dashboard/LessonCard';
 import { MasteryStats } from '@/components/dashboard/MasteryStats';
 import { ReviewSessionCard } from '@/components/dashboard/ReviewSessionCard';
@@ -6,8 +7,13 @@ import { SuggestedReviewCard } from '@/components/dashboard/SuggestedReviewCard'
 import { LESSONS } from '@/content/lessons';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/contexts/ProgressContext';
-import { getLessonButtonState, getProgressPercent } from '@/services/progressService';
-import { lessonConceptMasteries } from '@/services/masteryService';
+import {
+  getLessonButtonState,
+  getProgressPercent,
+  hasMasteryPassed,
+} from '@/services/progressService';
+import { lessonConceptMasteries, lessonMasteryPercent } from '@/services/masteryService';
+import { IN_SCOPE_LESSONS } from '@/services/reviewSession';
 import { leaderboardStanding, subscribeLeaderboard } from '@/services/leaderboardService';
 import { effectiveStreak, todayString } from '@/services/streakService';
 import type { LeaderboardEntry } from '@/types/progress';
@@ -60,17 +66,55 @@ export function DashboardPage() {
 
       <h2 className="section-heading">Lessons</h2>
       <div className="lesson-list">
-        {LESSONS.map((meta) => (
-          <LessonCard
-            key={meta.lessonId}
-            lessonId={meta.lessonId}
-            title={meta.title}
-            description={meta.description}
-            buttonState={getLessonButtonState(progress, meta.lessonId, meta.requires)}
-            concepts={lessonConceptMasteries(meta.lessonId, conceptMastery)}
-          />
-        ))}
+        {LESSONS.map((meta) => {
+          const buttonState = getLessonButtonState(progress, meta.lessonId, meta.requires);
+          return (
+            <LessonCard
+              key={meta.lessonId}
+              lessonId={meta.lessonId}
+              title={meta.title}
+              description={meta.description}
+              buttonState={buttonState}
+              concepts={lessonConceptMasteries(meta.lessonId, conceptMastery)}
+              masteryPercent={lessonMasteryPercent(conceptMastery, meta.lessonId)}
+            />
+          );
+        })}
       </div>
+
+      <MasteryTestCard
+        unlocked={IN_SCOPE_LESSONS.every((id) => hasMasteryPassed(progress, id))}
+        passed={progress.masteryTestPassed === true}
+      />
     </div>
+  );
+}
+
+function MasteryTestCard({ unlocked, passed }: { unlocked: boolean; passed: boolean }) {
+  return (
+    <article className={`lesson-card mastery-test-card ${unlocked ? '' : 'lesson-card-locked'}`}>
+      <div className="mastery-test-info">
+        <h2>Mastery Test</h2>
+        <p className="muted mastery-test-desc">
+          {unlocked
+            ? 'One question per concept across every lesson, interleaved — pass each on the first try to complete the course.'
+            : "Pass every lesson's mastery quiz to unlock the final test."}
+        </p>
+      </div>
+      <div className="mastery-test-action">
+        {passed && (
+          <span className="mastery-badge mastery-mastered">🏆 Course mastered</span>
+        )}
+        {unlocked ? (
+          <Link to="/mastery-test" className="btn btn-lesson btn-quiz">
+            {passed ? 'Retake Mastery Test' : 'Start Mastery Test'}
+          </Link>
+        ) : (
+          <button type="button" className="btn btn-lesson btn-locked" disabled aria-disabled="true">
+            🔒 Locked
+          </button>
+        )}
+      </div>
+    </article>
   );
 }

@@ -223,6 +223,7 @@ const rtMissingLegPerimeter = make(
           prompt: 'Use the Pythagorean theorem to find the missing leg.',
           answer: b,
           feedback: {
+            correct: `$\\sqrt{${c}^2 - ${a}^2} = ${b}$`,
             wrong: 'Subtract the squares, then take the square root to get the missing leg.',
           },
         },
@@ -264,6 +265,7 @@ const rtMissingLegArea = make(
           prompt: 'Find the missing leg.',
           answer: b,
           feedback: {
+            correct: `$\\sqrt{${c}^2 - ${a}^2} = ${b}$`,
             wrong: 'Subtract the squares, then take the square root to get the missing leg.',
           },
         },
@@ -447,6 +449,7 @@ const distPerimeter = make(
           ],
           drawSegmentIds: ['ab', 'bc', 'ca'],
           feedback: {
+            correct: `$AB = ${s1}$, $BC = ${s2}$, $CA = ${s3}$ — each from $D = \\sqrt{\\Delta x^2 + \\Delta y^2}$.`,
             wrong: 'Use $D = \\sqrt{\\Delta x^2 + \\Delta y^2}$ on each pair of vertices.',
             hint: 'For each side, find the horizontal and vertical change between its endpoints, then apply the distance formula.',
           },

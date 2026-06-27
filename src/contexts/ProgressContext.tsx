@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -13,10 +14,14 @@ import {
   saveProfile,
   subscribeProgress,
   recordLessonActivity,
+  runV3MigrationIfNeeded,
   deleteUserData,
   resetProgress as resetProgressService,
 } from '@/services/progressService';
-import { subscribeConceptMastery } from '@/services/reviewService';
+import {
+  subscribeConceptMastery,
+  deleteAllConceptMastery,
+} from '@/services/reviewService';
 import {
   emptyProgress,
   type UserProfile,
@@ -45,6 +50,9 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [conceptMastery, setConceptMastery] = useState<ConceptMasteryMap>({});
   const [loading, setLoading] = useState(true);
+  // Guards the one-time Phase 3 back-compat migration so it runs at most once
+  // per signed-in session even though progress snapshots stream in repeatedly.
+  const migrationStartedRef = useRef(false);
 
   useEffect(() => {
     if (!user) {
@@ -56,6 +64,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     }
 
     setLoading(true);
+    migrationStartedRef.current = false;
     let progressReady = false;
     let profileReady = false;
     const settle = () => {
@@ -67,6 +76,14 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         setProgress(p);
         progressReady = true;
         settle();
+        // Mark legacy completions as `legacyCompleted` exactly once, before the
+        // learner can complete anything new, so the sticky quiz gate is correct
+        // for fresh learners and never re-locks existing ones (without robbing
+        // them of the Mastery Quiz on lessons they already completed).
+        if (!p.v3Migrated && !migrationStartedRef.current) {
+          migrationStartedRef.current = true;
+          runV3MigrationIfNeeded(user.uid).catch(() => {});
+        }
       },
       () => {
         progressReady = true;
@@ -140,13 +157,24 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
 
   const resetProgress = useCallback(async () => {
     if (!user) return;
-    await resetProgressService(user.uid);
+    // Reset both stores: the progress/profile doc AND the separate
+    // conceptMastery collection (the "question progress"). Clearing only the
+    // former leaves mastery chips and Daily Review reflecting old data, which
+    // makes the reset look like it did nothing.
+    await Promise.all([
+      resetProgressService(user.uid),
+      deleteAllConceptMastery(user.uid),
+    ]);
     setProgress(emptyProgress());
+    setConceptMastery({});
   }, [user]);
 
   const wipeUserData = useCallback(async () => {
     if (!user) return;
-    await deleteUserData(user.uid);
+    await Promise.all([
+      deleteUserData(user.uid),
+      deleteAllConceptMastery(user.uid),
+    ]);
   }, [user]);
 
   const value = useMemo(

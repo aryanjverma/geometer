@@ -1,5 +1,6 @@
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -177,6 +178,17 @@ export async function fetchConceptMastery(
 ): Promise<ConceptMasteryMap> {
   const snap = await getDocs(conceptMasteryCol(uid));
   return mapFromDocs(snap);
+}
+
+/**
+ * Delete every concept-mastery record for a learner. Concept mastery is the
+ * "question progress" that drives the Daily Review and the per-lesson Mastered
+ * chips, so resetting/wiping a learner must clear it too — otherwise mastery
+ * survives a reset and the progress wipe looks like it did nothing.
+ */
+export async function deleteAllConceptMastery(uid: string): Promise<void> {
+  const snap = await getDocs(conceptMasteryCol(uid));
+  await Promise.all(snap.docs.map((d) => deleteDoc(d.ref)));
 }
 
 /**

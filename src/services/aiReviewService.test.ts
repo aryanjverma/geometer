@@ -3,6 +3,7 @@ import type { LessonStep } from '../types/lesson';
 import type { GeneratedQuestion } from '../types/review';
 import {
   validateReskin,
+  validateHint,
   hintLeaksAnswer,
   reskinQuestion,
   getSocraticHint,
@@ -74,6 +75,38 @@ describe('hintLeaksAnswer (B2)', () => {
   });
 });
 
+describe('validateHint (B2b)', () => {
+  it('accepts a plain-language method hint with no numbers or formulas', () => {
+    const hint = 'Square both legs and add them, then take a square root.';
+    expect(validateHint(hint, { a: 5, b: 12 }, 13)).toBe(true);
+  });
+
+  it('accepts a hint that only references the given numbers', () => {
+    const hint = 'Think about how the leg of 5 relates to the leg of 12.';
+    expect(validateHint(hint, { a: 5, b: 12 }, 13)).toBe(true);
+  });
+
+  it('rejects a hint that states the answer', () => {
+    expect(validateHint('It comes out to 13.', { a: 5, b: 12 }, 13)).toBe(false);
+  });
+
+  it('rejects a hint that introduces a computed number not among the givens', () => {
+    // 169 is an intermediate (5^2 + 12^2) that should never be handed over.
+    const hint = 'Add the squares to get 169, then undo the square.';
+    expect(validateHint(hint, { a: 5, b: 12 }, 13)).toBe(false);
+  });
+
+  it('rejects a hint containing a LaTeX formula', () => {
+    const hint = 'Use $\\sqrt{a^2 + b^2}$ to combine the legs.';
+    expect(validateHint(hint, { a: 5, b: 12 }, 13)).toBe(false);
+  });
+
+  it('rejects a hint containing an equation with operator symbols', () => {
+    const hint = 'Remember that a² + b² = c² and rearrange.';
+    expect(validateHint(hint, { a: 5, b: 12 }, 13)).toBe(false);
+  });
+});
+
 describe('reskinQuestion (B3)', () => {
   it('returns the reskinned text when it is valid', async () => {
     const reskinned =
@@ -112,6 +145,15 @@ describe('reskinQuestion (B3)', () => {
     await expect(reskinQuestion(q, ['basketball'], { generate })).resolves.toBe(
       q.basePrompt,
     );
+  });
+
+  it('returns basePrompt without calling the generator when AI is disabled', async () => {
+    const generate = vi.fn().mockResolvedValue('should never be used');
+    const q = makeQuestion({ a: 5, b: 12 }, 13);
+    await expect(
+      reskinQuestion(q, ['basketball'], { generate, enabled: false }),
+    ).resolves.toBe(q.basePrompt);
+    expect(generate).not.toHaveBeenCalled();
   });
 });
 
@@ -218,5 +260,24 @@ describe('getSocraticHint (B4)', () => {
     );
     const prompt = generate.mock.calls[0][0] as string;
     expect(prompt).not.toMatch(/stuck on/i);
+  });
+
+  it('returns a fallback hint without calling the generator when AI is disabled', async () => {
+    const stepHint = 'Think about the relationship between the legs and the hypotenuse.';
+    const generate = vi.fn().mockResolvedValue('should never be used');
+    const q = makeQuestion({ a: 5, b: 12 }, 13, {
+      step: {
+        id: 'q1',
+        type: 'numeric',
+        prompt: 'Find the hypotenuse.',
+        tag: 'You do',
+        answer: 13,
+        feedback: { hint: stepHint },
+      },
+    });
+    await expect(getSocraticHint(q, { generate, enabled: false })).resolves.toBe(
+      stepHint,
+    );
+    expect(generate).not.toHaveBeenCalled();
   });
 });

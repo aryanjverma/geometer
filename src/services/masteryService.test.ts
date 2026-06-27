@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { masteryLevel, lessonConceptMasteries } from './masteryService';
+import { masteryLevel, lessonConceptMasteries, lessonMasteryStatus } from './masteryService';
 import { foldAttempt } from './reviewService';
+import { conceptsForLesson } from '@/content/concepts';
 import { CONCEPTS_BY_LESSON } from '@/content/concepts';
 import {
   makeQuestionId,
@@ -111,5 +112,51 @@ describe('lessonConceptMasteries', () => {
 
   it('returns an empty array for an unknown lesson', () => {
     expect(lessonConceptMasteries('made-up-lesson', {})).toEqual([]);
+  });
+});
+
+describe('lessonMasteryStatus — dynamic aggregate (display only)', () => {
+  const lessonId = 'right-triangles';
+  const concepts = conceptsForLesson(lessonId);
+
+  function historyOf(levels: ReadonlyArray<boolean[]>): ConceptMasteryMap {
+    const map: ConceptMasteryMap = {};
+    levels.forEach((recentCorrect, i) => {
+      map[makeQuestionId(lessonId, concepts[i].stepId)] = record(
+        lessonId,
+        concepts[i].stepId,
+        recentCorrect,
+      );
+    });
+    return map;
+  }
+
+  it('mastered when every concept is mastered', () => {
+    const history = historyOf(concepts.map(() => [true, true]));
+    expect(lessonMasteryStatus(history, lessonId)).toBe('mastered');
+  });
+
+  it('needs-review when any concept needs review (un-master)', () => {
+    const levels = concepts.map(() => [true, true]);
+    levels[0] = [false, false];
+    expect(lessonMasteryStatus(historyOf(levels), lessonId)).toBe('needs-review');
+  });
+
+  it('in-progress when concepts are mixed but none need review', () => {
+    const levels = concepts.map(() => [true, true]);
+    levels[0] = [true]; // learning
+    expect(lessonMasteryStatus(historyOf(levels), lessonId)).toBe('in-progress');
+  });
+
+  it('an unmastered concept re-masters when answered correctly again', () => {
+    // Drop concept 0 to needs-review, then push two corrects → mastered again.
+    const dropped = historyOf(concepts.map((_, i) => (i === 0 ? [false, false] : [true, true])));
+    expect(lessonMasteryStatus(dropped, lessonId)).toBe('needs-review');
+    const restored = historyOf(concepts.map(() => [true, true]));
+    expect(lessonMasteryStatus(restored, lessonId)).toBe('mastered');
+  });
+
+  it('a lesson with no concepts is in-progress', () => {
+    expect(lessonMasteryStatus({}, 'made-up-lesson')).toBe('in-progress');
   });
 });

@@ -10,6 +10,8 @@ import { LeaderboardPage } from '@/pages/LeaderboardPage';
 import { AccountPage } from '@/pages/AccountPage';
 import { LessonPage } from '@/pages/LessonPage';
 import { ReviewPage } from '@/pages/ReviewPage';
+import { MasteryQuizPage } from '@/pages/MasteryQuizPage';
+import { MasteryTestPage } from '@/pages/MasteryTestPage';
 
 export default function App() {
   return (
@@ -53,6 +55,24 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <ReviewPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/quiz/:lessonId"
+              element={
+                <ProtectedRoute>
+                  <MasteryQuizPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/mastery-test"
+              element={
+                <ProtectedRoute>
+                  <MasteryTestPage />
                 </ProtectedRoute>
               }
             />

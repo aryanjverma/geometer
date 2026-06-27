@@ -138,6 +138,9 @@ export function ReviewPage() {
   const { user } = useAuth();
   const { progress, profile, loading } = useProgress();
   const interests = useMemo(() => profile?.interests ?? [], [profile]);
+  // Explicit AI off-switch (Account page). When false, the session skips all
+  // reskin/hint AI calls and uses deterministic prompts + hand-written hints.
+  const aiEnabled = profile?.aiEnabled !== false;
 
   const [status, setStatus] = useState<Status>('loading');
   const [questions, setQuestions] = useState<SessionQuestion[]>([]);
@@ -158,6 +161,10 @@ export function ReviewPage() {
   // snapshot must not restart the build and re-fire AI calls mid-flight.
   const interestsRef = useRef(interests);
   interestsRef.current = interests;
+  // Read the AI off-switch through a ref for the same reason: a profile snapshot
+  // arriving mid-build must not restart the one-shot load.
+  const aiEnabledRef = useRef(aiEnabled);
+  aiEnabledRef.current = aiEnabled;
 
   // The realtime progress listener keeps pushing fresh snapshots, so `progress`
   // changes reference well after the page mounts. We read it through a ref so a
@@ -247,16 +254,20 @@ export function ReviewPage() {
         // Each resolves to its own basePrompt on timeout/validation-failure/
         // error, so the fallback is decided here — before the learner ever sees
         // the question — and never swaps in later.
-        console.info(`[review] reskinning all ${generated.length} questions…`);
         const seeded: SessionQuestion[] = generated.map((q) => ({
           ...q,
           displayPrompt: q.question.basePrompt,
         }));
-        const built = await loadReskins(
-          seeded,
-          interestsRef.current,
-          () => active,
-        );
+        // AI off-switch: when disabled, skip the reskin phase entirely (no AI
+        // call is attempted) and present the deterministic template prompts.
+        let built: SessionQuestion[];
+        if (aiEnabledRef.current) {
+          console.info(`[review] reskinning all ${generated.length} questions…`);
+          built = await loadReskins(seeded, interestsRef.current, () => active);
+        } else {
+          console.info('[review] AI disabled — using plain template prompts');
+          built = seeded;
+        }
         const reskinnedCount = built.filter(
           (q) => q.displayPrompt !== q.question.basePrompt,
         ).length;
@@ -395,6 +406,7 @@ export function ReviewPage() {
         getSocraticHint(current.question, {
           lastWrongAnswer: lastWrongRef.current,
           struggle,
+          enabled: aiEnabled,
         }),
         HINT_BUDGET_MS,
         'Take it one step at a time — reread the problem and identify what each number represents.',

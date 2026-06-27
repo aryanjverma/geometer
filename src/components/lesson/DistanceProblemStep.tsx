@@ -18,9 +18,16 @@ interface DistanceProblemStepProps {
    * leaves all Phase 1 grading and advance behavior untouched.
    */
   onAttempt?: (correct: boolean, value: number) => void;
+  /**
+   * Phase 3 — FR-7 locked-in assessment rendering. When true, each subStep takes
+   * a single submission and advances immediately with no feedback, no hint, no
+   * Continue, and no car journey. Correctness for EVERY subStep is reported
+   * through `onAttempt` so a wrong intermediate part is recorded; all feedback is
+   * deferred to the end-of-assessment review.
+   */
+  assessmentMode?: boolean;
 }
 
-const CELEBRATE_MS = 1200;
 const CAR_MS_PER_UNIT = 200;
 const CAR_END_BUFFER_MS = 500;
 
@@ -35,7 +42,12 @@ function numericMatches(sub: DistanceSubStep, values: number[]): boolean {
   return fields.every((f, i) => values[i] === f.answer);
 }
 
-export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProblemStepProps) {
+export function DistanceProblemStep({
+  step,
+  onCorrect,
+  onAttempt,
+  assessmentMode = false,
+}: DistanceProblemStepProps) {
   const subSteps = step.subSteps ?? [];
   const graph = step.graph;
 
@@ -47,6 +59,7 @@ export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProb
   const [drawnSegmentIds, setDrawnSegmentIds] = useState<string[]>([]);
   const [carIndex, setCarIndex] = useState(0);
   const [carLegMs, setCarLegMs] = useState(0);
+  const [solved, setSolved] = useState(false);
 
   const sub = subSteps[partIndex];
   if (!sub) return null;
@@ -77,7 +90,8 @@ export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProb
       }, acc);
       acc += legMs;
     }
-    setTimeout(onCorrect, acc + CAR_END_BUFFER_MS);
+    // After the car arrives, surface Continue instead of auto-advancing (FR-1).
+    setTimeout(() => setSolved(true), acc + CAR_END_BUFFER_MS);
   };
 
   const advanceAfterCorrect = (segmentIds?: string[]) => {
@@ -90,7 +104,7 @@ export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProb
       if (step.carPath && step.carPath.length > 1) {
         runJourney(step.carPath);
       } else {
-        setTimeout(onCorrect, CELEBRATE_MS);
+        setSolved(true);
       }
       return;
     }
@@ -113,10 +127,26 @@ export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProb
     setValues([]);
   };
 
+  // Assessment mode (FR-7): record this subStep's correctness, then advance to
+  // the next subStep or finish — single shot, no feedback, no car journey.
+  const assessmentAdvance = (correct: boolean, value: number) => {
+    onAttempt?.(correct, value);
+    if (isLast) {
+      onCorrect();
+      return;
+    }
+    setPartIndex((p) => p + 1);
+    setValues([]);
+  };
+
   const handleNumericSubmit = () => {
     const parsed = fields.map((_, i) => parseInt(values[i] ?? '', 10));
     if (parsed.some((n) => Number.isNaN(n))) return;
     const correct = numericMatches(sub, parsed);
+    if (assessmentMode) {
+      assessmentAdvance(correct, parsed[parsed.length - 1]);
+      return;
+    }
     // Only the final subStep carries the question's graded answer, so attempts
     // are reported there (and never for intermediate parts).
     if (isLast) onAttempt?.(correct, parsed[parsed.length - 1]);
@@ -128,6 +158,10 @@ export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProb
   };
 
   const handleChoice = (choiceId: string) => {
+    if (assessmentMode) {
+      assessmentAdvance(choiceId === sub.correctChoice, 0);
+      return;
+    }
     if (choiceId === sub.correctChoice) {
       advanceAfterCorrect(sub.drawSegmentIds);
     } else {
@@ -161,6 +195,7 @@ export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProb
                 type="button"
                 className="btn btn-secondary choice-btn"
                 onClick={() => handleChoice(choice.id)}
+                disabled={solved}
               >
                 <MathText>{choice.label}</MathText>
               </button>
@@ -185,10 +220,11 @@ export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProb
                   onChange={(e) => setField(i, e.target.value)}
                   placeholder="?"
                   aria-label={field.label || 'Numeric answer'}
+                  disabled={solved}
                 />
               </label>
             ))}
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" disabled={solved}>
               Check
             </button>
           </form>
@@ -197,6 +233,11 @@ export function DistanceProblemStep({ step, onCorrect, onAttempt }: DistanceProb
           <p className={`feedback feedback-${feedback.variant}`}>
             <MathText>{feedback.message}</MathText>
           </p>
+        )}
+        {solved && (
+          <button type="button" className="continue-btn" onClick={onCorrect}>
+            Continue
+          </button>
         )}
       </div>
     </div>

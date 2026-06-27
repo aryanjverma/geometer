@@ -40,6 +40,25 @@ export function lessonConceptMasteries(
   });
 }
 
+/**
+ * Phase 3 — display-only aggregate of a lesson's live concept mastery (the
+ * dynamic "Mastered" / "Review recommended" chip). All concepts mastered →
+ * `mastered`; any concept needs review → `needs-review`; otherwise
+ * `in-progress`. This moves up and down with Daily Review performance and does
+ * NOT affect the sticky unlock gate (`isLessonLocked`). A lesson with no
+ * tracked concepts is `in-progress`.
+ */
+export function lessonMasteryStatus(
+  history: ConceptMasteryMap,
+  lessonId: string,
+): 'mastered' | 'in-progress' | 'needs-review' {
+  const levels = lessonConceptMasteries(lessonId, history).map((m) => m.level);
+  if (levels.length === 0) return 'in-progress';
+  if (levels.some((l) => l === 'need-review')) return 'needs-review';
+  if (levels.every((l) => l === 'mastered')) return 'mastered';
+  return 'in-progress';
+}
+
 /** Numeric weight of a mastery level: mastered=2, learning=1, need-review=0. */
 export function masteryScore(level: MasteryLevel): number {
   if (level === 'mastered') return 2;
@@ -63,6 +82,21 @@ export function allConceptMasteries(
  */
 export function masteryPercent(history: ConceptMasteryMap): number {
   const all = allConceptMasteries(history);
+  if (all.length === 0) return 0;
+  const sum = all.reduce((n, { level }) => n + masteryScore(level), 0);
+  return Math.round((sum / (2 * all.length)) * 100);
+}
+
+/**
+ * Mastery percent for a single lesson's concepts. Each concept scores 0-2 and
+ * 100% means every concept in the lesson is mastered. Returns 0 when the lesson
+ * has no tracked concepts.
+ */
+export function lessonMasteryPercent(
+  history: ConceptMasteryMap,
+  lessonId: string,
+): number {
+  const all = lessonConceptMasteries(lessonId, history);
   if (all.length === 0) return 0;
   const sum = all.reduce((n, { level }) => n + masteryScore(level), 0);
   return Math.round((sum / (2 * all.length)) * 100);

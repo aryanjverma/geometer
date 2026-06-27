@@ -26,6 +26,7 @@ function renderCard(props: Partial<Parameters<typeof LessonCard>[0]> = {}) {
         description="Master the Pythagorean theorem."
         buttonState="Review"
         concepts={CONCEPTS}
+        masteryPercent={50}
         {...props}
       />
     </MemoryRouter>,
@@ -33,16 +34,27 @@ function renderCard(props: Partial<Parameters<typeof LessonCard>[0]> = {}) {
 }
 
 describe('LessonCard face', () => {
-  it('shows the title, the count summary pills, and a single open-modal button', () => {
+  it('shows the title, the mastery percentage, and a single open-modal button', () => {
     renderCard();
     // Title.
     expect(screen.getByRole('heading', { name: 'Right Triangles' })).toBeTruthy();
-    // Brief concept mastery overview (count pills).
-    expect(screen.getByText('1 Mastered')).toBeTruthy();
-    expect(screen.getByText('1 Learning')).toBeTruthy();
-    expect(screen.getByText('1 To review')).toBeTruthy();
+    // Single per-lesson mastery percentage (no count pills, no chip).
+    expect(screen.getByText('50%')).toBeTruthy();
+    expect(screen.queryByText('1 Mastered')).toBeNull();
+    expect(screen.queryByText('1 Learning')).toBeNull();
+    expect(screen.queryByText('1 To review')).toBeNull();
     // The single button that opens the expanded lesson view.
     expect(screen.getByRole('button', { name: OPEN_LABEL })).toBeTruthy();
+  });
+
+  it('renders no mastery chip on the face', () => {
+    const { container } = renderCard();
+    expect(container.querySelector('.lesson-mastery-chip')).toBeNull();
+  });
+
+  it('shows the percentage even at 0%', () => {
+    renderCard({ buttonState: 'Locked', masteryPercent: 0 });
+    expect(screen.getByText('0%')).toBeTruthy();
   });
 
   it('does not render the description or a lesson-launch link on the face while closed', () => {
@@ -56,7 +68,7 @@ describe('LessonCard face', () => {
 });
 
 describe('LessonCard modal', () => {
-  it('opens a dialog with the description, every concept + badge, and the launch link', () => {
+  it('opens a dialog with the description and every concept + badge', () => {
     renderCard();
     fireEvent.click(screen.getByRole('button', { name: OPEN_LABEL }));
     const dialog = screen.getByRole('dialog');
@@ -71,10 +83,6 @@ describe('LessonCard modal', () => {
     expect(within(dialog).getByText('Mastered')).toBeTruthy();
     expect(within(dialog).getByText('Learning')).toBeTruthy();
     expect(within(dialog).getByText('Need to review')).toBeTruthy();
-
-    // Lesson-launch control: an enabled link to the lesson route.
-    const launch = within(dialog).getByRole('link', { name: 'Review' });
-    expect(launch.getAttribute('href')).toBe('/lesson/right-triangles');
   });
 
   it('closes the dialog on Escape and on the close button', () => {
@@ -109,15 +117,55 @@ describe('LessonCard mastery region', () => {
     expect(screen.getByRole('button', { name: OPEN_LABEL })).toBeTruthy();
     const empty = container.querySelector('.concept-summary-empty');
     expect(empty).not.toBeNull();
-    // Placeholder lives inside the body, replacing the summary list.
+    // Placeholder lives inside the body, replacing the percentage block.
     expect(container.querySelector('.lesson-card-body .concept-summary-empty')).not.toBeNull();
-    expect(container.querySelector('.concept-summary')).toBeNull();
+    expect(container.querySelector('.lesson-percent')).toBeNull();
   });
 
-  it('renders the summary list (not the placeholder) when concepts exist', () => {
+  it('renders the percentage block (not the placeholder) when concepts exist', () => {
     const { container } = renderCard();
-    expect(container.querySelector('.concept-summary')).not.toBeNull();
+    expect(container.querySelector('.lesson-percent')).not.toBeNull();
     expect(container.querySelector('.concept-summary-empty')).toBeNull();
+  });
+});
+
+describe('LessonCard modal CTAs', () => {
+  it('shows Review lesson + Retake Mastery Quiz once mastery is passed (Review state)', () => {
+    renderCard({ buttonState: 'Review' });
+    fireEvent.click(screen.getByRole('button', { name: OPEN_LABEL }));
+    const dialog = screen.getByRole('dialog');
+
+    const review = within(dialog).getByRole('link', { name: 'Review lesson' });
+    expect(review.getAttribute('href')).toBe('/lesson/right-triangles');
+
+    const quiz = within(dialog).getByRole('link', { name: 'Retake Mastery Quiz' });
+    expect(quiz.getAttribute('href')).toBe('/quiz/right-triangles');
+  });
+
+  it('shows Review lesson + Take Mastery Quiz when completed but not yet passed', () => {
+    renderCard({ buttonState: 'Take Mastery Quiz' });
+    fireEvent.click(screen.getByRole('button', { name: OPEN_LABEL }));
+    const dialog = screen.getByRole('dialog');
+
+    const review = within(dialog).getByRole('link', { name: 'Review lesson' });
+    expect(review.getAttribute('href')).toBe('/lesson/right-triangles');
+
+    const quiz = within(dialog).getByRole('link', { name: 'Take Mastery Quiz' });
+    expect(quiz.getAttribute('href')).toBe('/quiz/right-triangles');
+  });
+
+  it('shows only a single launch link before completion (Start / Continue)', () => {
+    renderCard({ buttonState: 'Start' });
+    fireEvent.click(screen.getByRole('button', { name: OPEN_LABEL }));
+    const dialog = screen.getByRole('dialog');
+
+    const links = within(dialog).getAllByRole('link');
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute('href')).toBe('/lesson/right-triangles');
+    expect(links[0].textContent).toBe('Start');
+
+    // No mastery-quiz launch before completion.
+    expect(within(dialog).queryByRole('link', { name: /Mastery Quiz/ })).toBeNull();
   });
 });
 

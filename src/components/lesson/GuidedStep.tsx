@@ -19,8 +19,6 @@ interface GuidedStepProps {
   onCorrect: () => void;
 }
 
-const CELEBRATE_MS = 1200;
-
 function matches(part: GuidedPart, values: number[]): boolean {
   if (part.inputs && part.inputs.length > 0) {
     const expected = part.inputs.map((i) => i.answer);
@@ -67,7 +65,6 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
         setFeedback({ message: part.feedback?.correct ?? 'Correct!', variant: 'correct' });
         setSolved(true);
         setCelebrate(true);
-        setTimeout(onCorrect, CELEBRATE_MS);
         return;
       }
       setPartIndex((p) => p + 1);
@@ -153,10 +150,11 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
                 onChange={(e) => setField(i, e.target.value)}
                 placeholder="?"
                 aria-label={field.label || 'Numeric answer'}
+                disabled={solved}
               />
             </label>
           ))}
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className="btn btn-primary" disabled={solved}>
             Check
           </button>
         </form>
@@ -164,6 +162,11 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
           <p className={`feedback feedback-${feedback.variant}`}>
             <MathText>{feedback.message}</MathText>
           </p>
+        )}
+        {solved && (
+          <button type="button" className="continue-btn" onClick={onCorrect}>
+            Continue
+          </button>
         )}
       </div>
     </div>

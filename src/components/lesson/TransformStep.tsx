@@ -12,8 +12,6 @@ interface TransformStepProps {
   onCorrect: () => void;
 }
 
-const CELEBRATE_MS = 1200;
-
 export function TransformStep({ step, onCorrect }: TransformStepProps) {
   const transform = step.transform;
   const grid = step.grid;
@@ -50,7 +48,6 @@ export function TransformStep({ step, onCorrect }: TransformStepProps) {
     if (isMatch && !done) {
       setDone(true);
       setCelebrate(true);
-      setTimeout(onCorrect, CELEBRATE_MS);
     }
   };
 
@@ -133,9 +130,14 @@ export function TransformStep({ step, onCorrect }: TransformStepProps) {
 
       <div className="answer-box">
         {matched ? (
-          <p className="feedback feedback-correct">
-            <MathText>{step.feedback?.correct ?? 'That is the correct image.'}</MathText>
-          </p>
+          <>
+            <p className="feedback feedback-correct">
+              <MathText>{step.feedback?.correct ?? 'That is the correct image.'}</MathText>
+            </p>
+            <button type="button" className="continue-btn" onClick={onCorrect}>
+              Continue
+            </button>
+          </>
         ) : (
           step.feedback?.hint && (
             <p className="muted hint-text"><MathText>{step.feedback.hint}</MathText></p>

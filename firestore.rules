@@ -8,14 +8,16 @@ service cloud.firestore {
     match /users/{userId}/data/profile {
       allow read, delete: if isOwner(userId);
       allow create, update: if isOwner(userId)
-        && request.resource.data.keys().hasOnly(['displayName', 'photoURL', 'interests'])
+        && request.resource.data.keys().hasOnly(['displayName', 'photoURL', 'interests', 'aiEnabled'])
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() <= 100
         && request.resource.data.photoURL is string
         && request.resource.data.photoURL.size() <= 300
         && (!('interests' in request.resource.data)
             || (request.resource.data.interests is list
-                && request.resource.data.interests.size() <= 20));
+                && request.resource.data.interests.size() <= 20))
+        && (!('aiEnabled' in request.resource.data)
+            || request.resource.data.aiEnabled is bool);
     }
 
     // Per-concept mastery records. Each doc id is "lessonId__stepId".
@@ -37,11 +39,17 @@ service cloud.firestore {
     match /users/{userId}/data/progress {
       allow read, delete: if isOwner(userId);
       allow create, update: if isOwner(userId)
-        && request.resource.data.keys().hasOnly(['lessonProgress', 'streak', 'lastActivityDate'])
+        && request.resource.data.keys().hasOnly([
+            'lessonProgress', 'streak', 'lastActivityDate',
+            'masteryTestPassed', 'masteryTestPassedAt', 'v3Migrated'
+          ])
         && request.resource.data.lessonProgress is map
         && request.resource.data.lessonProgress.size() <= 500
         && (!('streak' in request.resource.data) || request.resource.data.streak is int)
-        && (!('lastActivityDate' in request.resource.data) || request.resource.data.lastActivityDate is string);
+        && (!('lastActivityDate' in request.resource.data) || request.resource.data.lastActivityDate is string)
+        && (!('masteryTestPassed' in request.resource.data) || request.resource.data.masteryTestPassed is bool)
+        && (!('masteryTestPassedAt' in request.resource.data) || request.resource.data.masteryTestPassedAt is int)
+        && (!('v3Migrated' in request.resource.data) || request.resource.data.v3Migrated is bool);
     }
 
     // Public streak leaderboard: any signed-in user may read; each user may

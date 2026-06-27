@@ -81,37 +81,87 @@ interface StepRendererProps {
    * behavior. Used by the review runner to persist right/wrong attempts.
    */
   onAttempt?: (correct: boolean, value: number) => void;
+  /**
+   * Phase 3 — assessment mode. When true, wrong answers show the plain
+   * `feedback.wrong` and never escalate to the struggle-gated `feedback.hint`
+   * (the desirable-difficulty support that belongs only inside lessons). Default
+   * false preserves all Phase 1/2 behavior.
+   */
+  suppressHints?: boolean;
+  /**
+   * Phase 3 — FR-7 locked-in assessment rendering. When true, a question takes a
+   * SINGLE submission and then advances immediately (`onCorrect`) with no
+   * correct/wrong feedback, no hint, no Continue button, no confetti, and no
+   * answer reveal in the figure. Correctness is still reported through
+   * `onAttempt`, so grading is unchanged; all right/wrong feedback is deferred to
+   * the end-of-assessment review screen. Implies `suppressHints`. Default false
+   * preserves all lesson / Daily Review behavior (FR-1 Continue-to-advance).
+   */
+  assessmentMode?: boolean;
 }
 
-const CELEBRATE_MS = 1200;
-
-export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRendererProps) {
+export function StepRenderer({
+  step,
+  stepIndex,
+  onCorrect,
+  onAttempt,
+  suppressHints = false,
+  assessmentMode = false,
+}: StepRendererProps) {
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [unfolded, setUnfolded] = useState(false);
   const [partADone, setPartADone] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
+  // Phase 3 — a correct FINAL answer no longer auto-advances. We reveal the
+  // explanation + confetti and wait for the learner to tap Continue, so the
+  // feedback is impossible to miss.
+  const [solved, setSolved] = useState(false);
 
-  // Correct answer that ends the step: reveal, celebrate, then advance.
+  // Correct answer that ends the step: reveal, celebrate, then wait for Continue.
+  // In assessment mode (FR-7) the single submission advances immediately with no
+  // feedback, reveal, or confetti — all of that is deferred to the end screen.
   const finishStep = (msg: string): boolean => {
+    if (assessmentMode) {
+      onCorrect();
+      return true;
+    }
     setFeedback({ message: msg, variant: 'correct' });
     setRevealed(true);
     setCelebrate(true);
-    setTimeout(onCorrect, CELEBRATE_MS);
+    setSolved(true);
     return true;
   };
 
   const handleWrong = (msg: string, hint?: string): boolean => {
+    // Assessment mode: one shot, no second try and no feedback — advance now.
+    if (assessmentMode) {
+      onCorrect();
+      return false;
+    }
     const attempts = wrongAttempts + 1;
     setWrongAttempts(attempts);
-    if (attempts >= 1 && hint) {
+    if (!suppressHints && attempts >= 1 && hint) {
       setFeedback({ message: hint, variant: 'hint' });
     } else {
       setFeedback({ message: msg, variant: 'wrong' });
     }
     return false;
   };
+
+  // Feedback row shared by every step shape: the explanation, then the explicit
+  // Continue button once the final answer is correct (FR-1).
+  const renderFeedback = () => (
+    <>
+      {feedback && <AnswerFeedback {...feedback} />}
+      {solved && (
+        <button type="button" className="continue-btn" onClick={onCorrect}>
+          Continue
+        </button>
+      )}
+    </>
+  );
 
   if (step.type === 'transition') {
     return <TransitionStep step={step} onCorrect={onCorrect} />;
@@ -146,7 +196,14 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
   }
 
   if (step.type === 'distance-guided' || step.type === 'distance-problem') {
-    return <DistanceProblemStep step={step} onCorrect={onCorrect} onAttempt={onAttempt} />;
+    return (
+      <DistanceProblemStep
+        step={step}
+        onCorrect={onCorrect}
+        onAttempt={onAttempt}
+        assessmentMode={assessmentMode}
+      />
+    );
   }
 
   if (step.type === 'interactive-unfold' && step.triangle && 'legs' in step.triangle) {
@@ -167,7 +224,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
-            disabled={!unfolded}
+            disabled={!unfolded || solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -178,7 +235,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
           {!unfolded && (
             <p className="muted hint-text">Unfold the triangle first, then enter the perimeter.</p>
           )}
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -200,6 +257,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
+            disabled={solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               if (value === step.answer) {
@@ -215,7 +273,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
               return handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -238,6 +296,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
+            disabled={solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -245,7 +304,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
                 : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -276,6 +335,15 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
               <NumericInput
                 key="part-a"
                 onSubmit={(value) => {
+                  // Assessment mode: record this part's correctness and advance
+                  // to part B on a single submission, with no feedback.
+                  if (assessmentMode) {
+                    onAttempt?.(value === partA?.answer, value);
+                    setPartADone(true);
+                    setFeedback(null);
+                    setWrongAttempts(0);
+                    return true;
+                  }
                   if (value === partA?.answer) {
                     setPartADone(true);
                     setFeedback(null);
@@ -287,7 +355,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
                   return handleWrong(partA?.feedback?.wrong ?? 'Try again.');
                 }}
               />
-              {feedback && <AnswerFeedback {...feedback} />}
+              {renderFeedback()}
             </div>
           </>
         ) : (
@@ -304,7 +372,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
             <div className="answer-box">
               <NumericInput
                 key="part-b"
-                disabled={!unfolded}
+                disabled={!unfolded || solved}
                 onSubmit={(value) => {
                   onAttempt?.(value === partB?.answer, value);
                   return value === partB?.answer
@@ -315,7 +383,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
               {!unfolded && (
                 <p className="muted hint-text">Unfold the triangle first, then enter the perimeter.</p>
               )}
-              {feedback && <AnswerFeedback {...feedback} />}
+              {renderFeedback()}
             </div>
           </>
         )}
@@ -347,6 +415,16 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
             <NumericInput
               key="part-a"
               onSubmit={(value) => {
+                // Assessment mode: record correctness and advance to part B on a
+                // single submission. The correct intermediate value is still
+                // revealed (above) so a miss on part A doesn't doom part B.
+                if (assessmentMode) {
+                  onAttempt?.(value === partA?.answer, value);
+                  setPartADone(true);
+                  setFeedback(null);
+                  setWrongAttempts(0);
+                  return true;
+                }
                 if (value === partA?.answer) {
                   setPartADone(true);
                   setFeedback(null);
@@ -361,6 +439,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
           ) : (
             <NumericInput
               key="part-b"
+              disabled={solved}
               onSubmit={(value) => {
                 onAttempt?.(value === partB?.answer, value);
                 return value === partB?.answer
@@ -369,7 +448,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
               }}
             />
           )}
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -397,6 +476,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
+            disabled={solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               if (value === step.answer) {
@@ -411,7 +491,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
               return handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -438,6 +518,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
+            disabled={solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -445,7 +526,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
                 : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -469,7 +550,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
-            disabled={!unfolded}
+            disabled={!unfolded || solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -480,7 +561,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
           {!unfolded && (
             <p className="muted hint-text">Swipe the handle down to split the triangle first.</p>
           )}
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -507,6 +588,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
+            disabled={solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -514,7 +596,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
                 : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -539,6 +621,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
+            disabled={solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -546,7 +629,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
                 : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -562,6 +645,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
+            disabled={solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -569,7 +653,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
                 : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -589,6 +673,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
+            disabled={solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -596,7 +681,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
                 : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -617,6 +702,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
+            disabled={solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -624,7 +710,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
                 : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -647,7 +733,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
         </div>
         <div className="answer-box">
           <NumericInput
-            disabled={!unfolded}
+            disabled={!unfolded || solved}
             onSubmit={(value) => {
               onAttempt?.(value === step.answer, value);
               return value === step.answer
@@ -658,7 +744,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
           {!unfolded && (
             <p className="muted hint-text">Slice the cone first to reveal the right triangle.</p>
           )}
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );
@@ -687,7 +773,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
               </p>
               <NumericInput
                 key="radius"
-                disabled={!unfolded}
+                disabled={!unfolded || solved}
                 onSubmit={(value) => {
                   if (value === step.answer) {
                     setPartADone(true);
@@ -713,6 +799,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
               </p>
               <NumericInput
                 key="volume"
+                disabled={solved}
                 onSubmit={(value) => {
                   onAttempt?.(value === step.volumeAnswer, value);
                   return value === step.volumeAnswer
@@ -725,7 +812,7 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
               />
             </>
           )}
-          {feedback && <AnswerFeedback {...feedback} />}
+          {renderFeedback()}
         </div>
       </div>
     );

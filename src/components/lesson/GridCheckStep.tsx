@@ -14,8 +14,6 @@ interface GridCheckStepProps {
   onCorrect: () => void;
 }
 
-const CELEBRATE_MS = 1200;
-
 function fieldsFor(sub: DistanceSubStep): GuidedInput[] {
   if (sub.inputs && sub.inputs.length > 0) return sub.inputs;
   return [{ id: sub.id, label: '', answer: sub.answer ?? 0 }];
@@ -37,6 +35,7 @@ export function GridCheckStep({ step, onCorrect }: GridCheckStepProps) {
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
+  const [solved, setSolved] = useState(false);
 
   const sub = subSteps[partIndex];
   if (!sub) return null;
@@ -56,7 +55,7 @@ export function GridCheckStep({ step, onCorrect }: GridCheckStepProps) {
     if (isLast) {
       setFeedback({ message: sub.feedback?.correct ?? 'Correct!', variant: 'correct' });
       setCelebrate(true);
-      setTimeout(onCorrect, CELEBRATE_MS);
+      setSolved(true);
       return;
     }
     setPartIndex((p) => p + 1);
@@ -113,6 +112,7 @@ export function GridCheckStep({ step, onCorrect }: GridCheckStepProps) {
                 type="button"
                 className="btn btn-secondary choice-btn"
                 onClick={() => handleChoice(choice.id)}
+                disabled={solved}
               >
                 <MathText>{choice.label}</MathText>
               </button>
@@ -137,10 +137,11 @@ export function GridCheckStep({ step, onCorrect }: GridCheckStepProps) {
                   onChange={(e) => setField(i, e.target.value)}
                   placeholder="?"
                   aria-label={field.label || 'Numeric answer'}
+                  disabled={solved}
                 />
               </label>
             ))}
-            <button type="submit" className="btn btn-primary">
+            <button type="submit" className="btn btn-primary" disabled={solved}>
               Check
             </button>
           </form>
@@ -149,6 +150,11 @@ export function GridCheckStep({ step, onCorrect }: GridCheckStepProps) {
           <p className={`feedback feedback-${feedback.variant}`}>
             <MathText>{feedback.message}</MathText>
           </p>
+        )}
+        {solved && (
+          <button type="button" className="continue-btn" onClick={onCorrect}>
+            Continue
+          </button>
         )}
       </div>
     </div>

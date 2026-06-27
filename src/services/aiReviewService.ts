@@ -59,6 +59,51 @@ export function hintLeaksAnswer(hintText: string, answer: number): boolean {
   return hasStandaloneInteger(hintText, answer);
 }
 
+/** All standalone integer tokens (e.g. "12") found in `text`. */
+function standaloneIntegers(text: string): number[] {
+  const matches = text.match(/(?<!\d)\d+(?!\d)/g);
+  return matches ? matches.map((m) => Number(m)) : [];
+}
+
+/**
+ * True if `text` contains explicit formula/equation notation. A Socratic hint
+ * must nudge toward the method in plain language, not hand over a formula, so we
+ * reject LaTeX delimiters/commands and common math-operator/equation markers.
+ */
+function hasFormulaNotation(text: string): boolean {
+  return (
+    /\$/.test(text) || // LaTeX inline delimiter
+    /\\[a-zA-Z]+/.test(text) || // LaTeX command, e.g. \frac \sqrt \times
+    /[\^_]/.test(text) || // superscript/subscript, e.g. a^2, a_1
+    /[=√×÷±²³]/.test(text) || // equation/operator/root/squared symbols
+    /\b\d+\s*\/\s*\d+\b/.test(text) || // explicit numeric fraction, e.g. 1/2
+    /[a-zA-Z0-9)]\s*[*/]\s*[a-zA-Z0-9(]/.test(text) // a*b, b/h style expressions
+  );
+}
+
+/**
+ * B2b — Number-preservation + formula validator for a Socratic hint, the hint
+ * analog of {@link validateReskin}. Returns true ONLY IF the hint:
+ *
+ * 1. does NOT state the `answer` as a standalone integer token;
+ * 2. introduces NO standalone integer that is not one of the given `params`
+ *    values (so it cannot leak the answer or any computed intermediate result);
+ * 3. contains NO explicit formula/equation notation (per {@link hasFormulaNotation}).
+ *
+ * A leak of the method-as-formula or any number outside the givens fails the
+ * check, which drives the retry-then-fallback path in {@link getSocraticHint}.
+ */
+export function validateHint(
+  hintText: string,
+  params: Record<string, number>,
+  answer: number,
+): boolean {
+  if (hasStandaloneInteger(hintText, answer)) return false;
+  if (hasFormulaNotation(hintText)) return false;
+  const allowed = new Set(Object.values(params).map((v) => Math.trunc(v)));
+  return standaloneIntegers(hintText).every((n) => allowed.has(n));
+}
+
 function buildReskinPrompt(
   question: GeneratedQuestion,
   interests: string[],
@@ -89,12 +134,17 @@ function buildReskinPrompt(
  * {@link validateReskin}. On a valid reskin returns the new text; on validation
  * failure, a thrown error, or a missing generator, returns `question.basePrompt`
  * so the deterministic prompt is always shown.
+ *
+ * When `deps.enabled` is false (the learner's explicit AI off-switch) the
+ * generator is never called and `question.basePrompt` is returned immediately,
+ * so the no-AI path is verifiable without simulating a network failure.
  */
 export async function reskinQuestion(
   question: GeneratedQuestion,
   interests: string[],
-  deps?: { generate?: TextGenerator },
+  deps?: { generate?: TextGenerator; enabled?: boolean },
 ): Promise<string> {
+  if (deps?.enabled === false) return question.basePrompt;
   const generate = deps?.generate ?? defaultGenerate;
   if (typeof generate !== 'function') return question.basePrompt;
   try {
@@ -139,7 +189,7 @@ function buildHintPrompt(
       ? `\nThe learner already tried ${lastWrongAnswer}, which is wrong.`
       : '';
   const retryNote = retry
-    ? '\nYour previous hint revealed the final number. Try again and DO NOT include the final answer.'
+    ? '\nYour previous hint leaked the answer or a formula. Try again: DO NOT include the final answer, any computed number, or any formula/equation.'
     : '';
   // The struggle text is learner-supplied UNTRUSTED DATA, never instructions.
   // We quote it for grounding and explicitly tell the model to disregard any
@@ -159,8 +209,9 @@ function buildHintPrompt(
     '- Do NOT reveal the final answer or a full worked solution.',
     '- Nudge the learner toward the method, not the result.',
     '- Keep it to a single sentence.',
-    '- For any math, write it as LaTeX wrapped in single dollar signs, e.g. $\\frac{1}{2}bh$ or $\\sqrt{a^2+b^2}$.',
-    '- Do NOT use any other Markdown formatting (no bold, italics, headings, lists, code fences, or links) — plain prose plus inline LaTeX only.',
+    '- Use plain language only. Do NOT write any formula or equation, and do NOT use LaTeX or math symbols (no $, \\frac, \\sqrt, =, ^, ×, ÷, √). Describe the relationship in words instead.',
+    '- Do NOT introduce any number other than the ones the learner is given; never state a computed value.',
+    '- Do NOT use any Markdown formatting (no bold, italics, headings, lists, code fences, or links) — plain prose only.',
     `\nProblem: ${question.basePrompt}`,
     `Known numbers: ${numbers}.${wrong}${retryNote}${struggleNote}`,
   ].join('\n');
@@ -168,7 +219,7 @@ function buildHintPrompt(
 
 function hintFallback(question: GeneratedQuestion): string {
   const stepHint = question.step.feedback?.hint;
-  if (stepHint && !hintLeaksAnswer(stepHint, question.answer)) {
+  if (stepHint && validateHint(stepHint, question.params, question.answer)) {
     return stepHint;
   }
   return GENERIC_HINT;
@@ -187,27 +238,37 @@ function hintFallback(question: GeneratedQuestion): string {
  * the hint targets that gap (Ask Geometer). It is single-round and treated as
  * untrusted data; the leak filter is the hard backstop no matter what it says.
  * Empty/whitespace `struggle` degrades to the plain problem-only hint.
+ *
+ * When `deps.enabled` is false (the learner's explicit AI off-switch) the
+ * generator is never called and a hand-written fallback hint is returned, so the
+ * no-AI path is verifiable without simulating a network failure.
  */
 export async function getSocraticHint(
   question: GeneratedQuestion,
-  deps?: { generate?: TextGenerator; lastWrongAnswer?: number; struggle?: string },
+  deps?: {
+    generate?: TextGenerator;
+    lastWrongAnswer?: number;
+    struggle?: string;
+    enabled?: boolean;
+  },
 ): Promise<string> {
+  if (deps?.enabled === false) return hintFallback(question);
   const generate = deps?.generate ?? defaultGenerate;
   if (typeof generate !== 'function') return hintFallback(question);
   try {
     const first = await generate(
       buildHintPrompt(question, deps?.lastWrongAnswer, false, deps?.struggle),
     );
-    if (!hintLeaksAnswer(first, question.answer)) {
+    if (validateHint(first, question.params, question.answer)) {
       console.info('[review][ai] hint ok for', question.formatId);
       return first;
     }
 
-    console.warn('[review][ai] hint leaked answer, retrying once');
+    console.warn('[review][ai] hint leaked answer/formula, retrying once');
     const second = await generate(
       buildHintPrompt(question, deps?.lastWrongAnswer, true, deps?.struggle),
     );
-    if (!hintLeaksAnswer(second, question.answer)) {
+    if (validateHint(second, question.params, question.answer)) {
       console.info('[review][ai] hint ok on retry for', question.formatId);
       return second;
     }

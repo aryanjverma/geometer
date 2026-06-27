@@ -287,3 +287,24 @@ The Knowledge Tree is organized from broad categories to specific facts. It dire
 - Left unchecked, AI tends to generate problems at the wrong difficulty and to repeat itself, so difficulty calibration and de-duplication are required for generated practice.
 
 [Link to source](https://www.iea.nl/sites/default/files/2025-10/Muszy%C5%84ski%20AIG%20LLM%20Report.pdf)
+
+## Product Decisions: Shipped vs. Considered and Rejected
+
+The research above points toward AI that *augments* deterministic instruction without ever owning the math. That principle is the line every feature decision was measured against: the numbers and the correct answer must come from deterministic, verifiable code, and AI may only add narrative or directional guidance that is checked against those known numbers before it reaches the learner. The table below names what was shipped, what was deliberately rejected, and why.
+
+### Shipped
+
+| Feature | Decision | Why |
+| --- | --- | --- |
+| AI word-problem reskin | Shipped | AI rewrites a deterministic `GeneratedQuestion` into an interest-themed word problem, but never invents math. A number-preservation validator (`validateReskin`) confirms every given parameter appears as a standalone integer and the answer does not appear at all; any failure falls back to the plain template. Engagement gain with zero risk of a wrong or leaked answer. |
+| Socratic hints | Shipped | Hints give a directional nudge toward the method, never the result. A hint validator (`validateHint`) — the same primitive extended — rejects any hint that states the answer, introduces a number outside the givens (a computed intermediate), or includes an explicit formula/equation; it retries once, then falls back to a hand-written hint. Supports productive struggle instead of answer-giving. |
+| Mastery-driven lesson selection | Shipped | A rule-based mastery layer (spaced-repetition-style) decides which concepts surface for review. Determinism keeps the learning path explainable and reproducible; AI never decides what to teach, only how to phrase it. |
+| Explicit AI off-switch | Shipped | An Account-page toggle (persisted to the profile) disables all reskin and hint AI calls. It makes the no-AI gate verifiable in-app — plain templates and hand-written hints, with no network call attempted — rather than only observable by forcing a failure. |
+
+### Considered and Rejected
+
+| Feature | Decision | Why rejected |
+| --- | --- | --- |
+| Open chatbot / free-form tutor | Rejected | An unconstrained chat surface invites off-task conversation, prompt injection, and answer-extraction, and there is no reliable way to verify each turn against ground truth. The single-round, validated "Ask Geometer" hint captures the tutoring value while staying inside a checkable boundary. |
+| LLM-as-grader | Rejected | Grading must be correct and reproducible. Deterministic solvers already produce the ground-truth answer, so handing correctness to a model would add latency, cost, and a class of silent mis-grades for zero benefit. AI never touches correctness. |
+| Free-form AI problem generation | Rejected | Models drift on difficulty, repeat near-duplicates, and can generate unsolvable or subtly wrong items (the TIMSS finding above). Parameterized formats with deterministic solvers guarantee on-standard, calibrated, verifiably correct questions; AI only reskins the prose around them. |

@@ -15,6 +15,7 @@ export function AccountPage() {
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('📐');
   const [interestsText, setInterestsText] = useState('');
+  const [aiEnabled, setAiEnabled] = useState(true);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -23,6 +24,7 @@ export function AccountPage() {
     setName(profile?.displayName ?? user?.displayName ?? '');
     setAvatar(profile?.photoURL?.startsWith('emoji:') ? profile.photoURL.slice(6) : '📐');
     setInterestsText(serializeInterests(profile?.interests ?? []));
+    setAiEnabled(profile?.aiEnabled !== false);
   }, [profile, user]);
 
   const interests = parseInterests(interestsText);
@@ -35,6 +37,7 @@ export function AccountPage() {
       displayName: name,
       photoURL: `emoji:${avatar}`,
       interests,
+      aiEnabled,
     });
     setMessage('Profile saved.');
   };
@@ -113,6 +116,21 @@ export function AccountPage() {
           ))}
         </div>
       )}
+
+      <label className="field field-toggle">
+        <input
+          type="checkbox"
+          checked={aiEnabled}
+          onChange={(e) => setAiEnabled(e.target.checked)}
+          aria-describedby="ai-help"
+        />
+        <span>AI word problems &amp; hints</span>
+      </label>
+      <p id="ai-help" className="muted interests-help">
+        When on, Daily Review uses AI to reskin questions into interest-themed
+        word problems and to generate Socratic hints. Turn it off to use the
+        plain template questions and hand-written hints — no AI is called.
+      </p>
 
       <button type="button" className="btn btn-primary" onClick={handleSave}>
         Save profile

@@ -10,6 +10,8 @@ interface LessonCardProps {
   description: string;
   buttonState: LessonButtonState;
   concepts?: Array<{ concept: Concept; level: MasteryLevel }>;
+  /** Per-lesson mastery percent (0-100) shown on the card face. */
+  masteryPercent: number;
 }
 
 const MASTERY_TEXT: Record<MasteryLevel, string> = {
@@ -18,12 +20,16 @@ const MASTERY_TEXT: Record<MasteryLevel, string> = {
   mastered: 'Mastered',
 };
 
-/** Order and short summary label for the collapsed count pills. */
-const SUMMARY: Array<{ level: MasteryLevel; short: string }> = [
-  { level: 'mastered', short: 'Mastered' },
-  { level: 'learning', short: 'Learning' },
-  { level: 'need-review', short: 'To review' },
-];
+/**
+ * Band a 0-100 lesson mastery percent into a level so the progress bar can take
+ * the matching colour. Mirrors the per-concept scale (2 pts each): the upper
+ * third reads as mastered, the middle as learning, the lower as need-review.
+ */
+function percentLevel(percent: number): MasteryLevel {
+  if (percent >= 67) return 'mastered';
+  if (percent >= 34) return 'learning';
+  return 'need-review';
+}
 
 export function LessonCard({
   lessonId,
@@ -31,17 +37,12 @@ export function LessonCard({
   description,
   buttonState,
   concepts = [],
+  masteryPercent,
 }: LessonCardProps) {
   const locked = buttonState === 'Locked';
+  const completed = buttonState === 'Review' || buttonState === 'Take Mastery Quiz';
+  const masteryPassed = buttonState === 'Review';
   const [open, setOpen] = useState(false);
-
-  const counts = concepts.reduce(
-    (acc, { level }) => {
-      acc[level] += 1;
-      return acc;
-    },
-    { 'need-review': 0, learning: 0, mastered: 0 } as Record<MasteryLevel, number>,
-  );
 
   const hasConcepts = concepts.length > 0;
 
@@ -57,13 +58,25 @@ export function LessonCard({
         )}
 
         {hasConcepts ? (
-          <ul className="concept-summary">
-            {SUMMARY.filter(({ level }) => counts[level] > 0).map(({ level, short }) => (
-              <li key={level} className={`concept-count mastery-${level}`}>
-                {counts[level]} {short}
-              </li>
-            ))}
-          </ul>
+          <div className="lesson-percent">
+            <div className="lesson-percent-head">
+              <span className="lesson-percent-label">Mastery</span>
+              <span className="lesson-percent-value">{masteryPercent}%</span>
+            </div>
+            <div
+              className="progress-track"
+              role="progressbar"
+              aria-valuenow={masteryPercent}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label="Lesson mastery"
+            >
+              <div
+                className={`progress-fill progress-fill-${percentLevel(masteryPercent)}`}
+                style={{ width: `${masteryPercent}%` }}
+              />
+            </div>
+          </div>
         ) : (
           <p className="concept-summary-empty muted">No concepts tracked yet</p>
         )}
@@ -104,11 +117,23 @@ export function LessonCard({
           >
             🔒 Locked
           </button>
+        ) : completed ? (
+          <div className="lesson-actions">
+            <Link
+              to={`/lesson/${lessonId}`}
+              className={`btn btn-lesson ${masteryPassed ? '' : 'lesson-action-secondary'}`}
+            >
+              Review lesson
+            </Link>
+            <Link
+              to={`/quiz/${lessonId}`}
+              className={`btn btn-lesson ${masteryPassed ? 'lesson-action-secondary' : 'btn-quiz'}`}
+            >
+              {masteryPassed ? 'Retake Mastery Quiz' : 'Take Mastery Quiz'}
+            </Link>
+          </div>
         ) : (
-          <Link
-            to={`/lesson/${lessonId}`}
-            className={`btn btn-lesson btn-${buttonState.toLowerCase()}`}
-          >
+          <Link to={`/lesson/${lessonId}`} className="btn btn-lesson">
             {buttonState}
           </Link>
         )}

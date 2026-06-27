@@ -1,10 +1,8 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { getLessonMeta } from '@/content/lessons';
-import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/contexts/ProgressContext';
 import { getLessonProgress, isLessonLocked } from '@/services/progressService';
-import { recordLessonCompletionAttempts } from '@/services/reviewService';
 import { ProgressBar } from '@/components/dashboard/ProgressBar';
 import { StepRenderer } from './StepRenderer';
 import { CongratsSlide } from './CongratsSlide';
@@ -12,14 +10,9 @@ import { CongratsSlide } from './CongratsSlide';
 export function LessonView() {
   const { lessonId = '' } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { progress, loading, setStep, completeLesson } = useProgress();
   const [finishing, setFinishing] = useState(false);
   const [saveError, setSaveError] = useState(false);
-  // Concept step ids the learner answered wrong at least once this lesson run.
-  // A struggled concept records a wrong flag on completion so a wrong answer
-  // never boosts mastery.
-  const struggledRef = useRef<Set<string>>(new Set());
 
   const meta = getLessonMeta(lessonId);
 
@@ -49,31 +42,26 @@ export function LessonView() {
     ? 100
     : Math.round((currentIndex / steps.length) * 100);
 
-  // Fired on every numeric submission of the current step; a wrong answer marks
-  // this step's concept as struggled for the completion record below.
-  const recordStruggle = (correct: boolean) => {
-    if (!correct) struggledRef.current.add(step.id);
-  };
+  // While finishing, the step counter (`currentStep`) is reset to 0 by
+  // `completeLesson`/`setStep`, which would make the label read "Step 1 of N".
+  // Pin the label to the final step so the congrats slide reads as complete.
+  const progressLabel = finishing
+    ? `${title} · Complete`
+    : `${title} · Step ${currentIndex + 1} of ${steps.length}`;
 
   const handleCorrect = async () => {
     setSaveError(false);
     try {
       if (isLast) {
         setFinishing(true);
+        // Phase 3 — finishing/replaying a lesson sets `completed` (which unlocks
+        // this lesson's Mastery Quiz) but no longer writes any mastery. Mastery
+        // moves only via the Mastery Quiz, the Mastery Test, and the Daily
+        // Review, so replays are unlimited and side-effect-free.
         if (!completed) {
           await completeLesson(lessonId);
         } else {
           await setStep(lessonId, 0);
-        }
-        // Finishing the lesson records one attempt per concept — correct only
-        // for concepts answered without a wrong attempt, so struggled concepts
-        // are held back. Best-effort: never block the congrats flow on this write.
-        if (user) {
-          void recordLessonCompletionAttempts(
-            user.uid,
-            lessonId,
-            struggledRef.current,
-          ).catch(() => {});
         }
         return;
       }
@@ -96,7 +84,7 @@ export function LessonView() {
         </Link>
       </div>
 
-      <ProgressBar percent={percent} label={`${title} · Step ${currentIndex + 1} of ${steps.length}`} />
+      <ProgressBar percent={percent} label={progressLabel} />
 
       {finishing ? (
         <CongratsSlide title={title} onContinue={goToDashboard} />
@@ -107,7 +95,6 @@ export function LessonView() {
               step={renderStep}
               stepIndex={currentIndex}
               onCorrect={handleCorrect}
-              onAttempt={recordStruggle}
             />
           </div>
           {saveError && (
