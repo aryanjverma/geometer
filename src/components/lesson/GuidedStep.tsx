@@ -2,7 +2,10 @@ import { useState } from 'react';
 import type { GuidedPart, LessonStep } from '@/types/lesson';
 import { StaticTriangle } from './StaticTriangle';
 import { GeneralTriangle } from './GeneralTriangle';
+import { ParallelLinesFigure } from './ParallelLinesFigure';
+import { TriangleAngleFigure } from './TriangleAngleFigure';
 import { StaticGrid, gridShapes } from './StaticGrid';
+import { Solid3D } from './Solid3D';
 import { Confetti } from './Confetti';
 import { MathText } from '@/components/MathText';
 
@@ -40,6 +43,7 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
   const [feedback, setFeedback] = useState<FeedbackState | null>(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [celebrate, setCelebrate] = useState(false);
+  const [solved, setSolved] = useState(false);
 
   const part = parts[partIndex];
   const fields = part?.inputs ?? [{ id: part?.id ?? 'value', label: '', answer: part?.answer ?? 0 }];
@@ -61,6 +65,7 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
     if (matches(part, parsed)) {
       if (isLastPart) {
         setFeedback({ message: part.feedback?.correct ?? 'Correct!', variant: 'correct' });
+        setSolved(true);
         setCelebrate(true);
         setTimeout(onCorrect, CELEBRATE_MS);
         return;
@@ -85,8 +90,19 @@ export function GuidedStep({ step, onCorrect }: GuidedStepProps) {
   };
 
   const renderVisual = () => {
+    const figure = part?.angleFigure ?? step.angleFigure;
+    if (figure) {
+      return figure.kind === 'exterior-triangle' ? (
+        <TriangleAngleFigure figure={figure} reveal={solved} />
+      ) : (
+        <ParallelLinesFigure figure={figure} />
+      );
+    }
     if (step.grid) {
       return <StaticGrid {...step.grid} shapes={gridShapes(step.grid)} />;
+    }
+    if (step.solid) {
+      return <Solid3D figure={step.solid} />;
     }
     if (triangle && 'legs' in triangle) {
       const { legs } = triangle;

@@ -12,22 +12,24 @@ This brainlift is meant to detail how AI-enhanced learning strategies can be use
 ### In Scope
 
 - Developing AI-powered learning integrations into my app that make learning easy.
-- Using learning science to create powerful features in my learning app that promote retention, increase engagement, and allow for people to learn more quicker.
+- Using learning science to create powerful features in my learning app that promote retention, increase engagement, and allow people to learn more in less time.
 
 ### Out of Scope
 
-- 
+- Building, training, or researching the underlying AI/LLM models themselves. This brainlift consumes existing foundation models as a tool; it is not about advancing core machine learning architectures.
 
-- 
+- Replacing human teachers, tutors, or formal schooling entirely. The focus is on augmenting and accelerating self-directed learning, not eliminating the human elements of education.
 
-- 
+- Learning domains outside of foundational mathematics. While the principles generalize, the concrete application here is geometry and adjacent math concepts, not language learning, soft skills, or unrelated subjects.
 
 ## DOK 4: Spiky Points of View (SPOVs)
 
-- **Spiky POV 1:** AI tutors can become more effective than human tutors.
-  - *Elaboration:* [Provide a detailed paragraph that defends your POV. Synthesize evidence from your DOK 3 Insights and DOK 2 Knowledge Tree to explain how you arrived at this conclusion. Explain its implications and why it is a novel or important perspective.]
-- **Spiky POV 2:** [State your second Spiky POV.]
-  - *Elaboration:* [Defend and elaborate on your second POV, connecting it back to your foundational research.]
+- **Spiky POV 1:** AI tutors will replace human tutors.
+  - *Elaboration:* AI is obviously very limited right now, considering how much it needs to do correctly in order to ensure learning (giving the right hints, being paired with other engagement mechanisms, and being checked against ground-truth metrics), but AI has capabilities that humans will simply never have. AI can process data at incredible speeds and use that data to power learning. For example, chat history can be used to adapt to different users' learning speeds instantly, which is a capability that human tutors won't be able to match. AI can tap into all the learning science mechanisms like spaced repetition, adaptive learning, micro-learning modules, and interleaving at a precision and accuracy that humans can't. Additionally, its speed will let it instantly create new questions, design new interactive learning material, and give feedback on assignments. Humans can't beat the speed and memory of AI, but as of right now, AI can't fully tap into that advantage due to the limitations of its current implementations. Within the next 10 years, I think AI tutors will become far more prevalent and, for many learners, will replace the human tutor entirely.
+- **Spiky POV 2:** Independent learning is a terrible idea.
+  - *Elaboration:* Students without direction have no direction (antanaclasis). Students need some sort of instructor to tell them what to do and guide them along the journey, even if an independent learning system does the actual teaching. They need a framework to understand where to go; otherwise they may be overwhelmed by the options and not know which one to pick. Sure, the journey should be different for different people, but that doesn't mean we shouldn't give students a tour guide. Students need a specific path, otherwise they may not attain all the necessary information they need to move on to the next level. This is why there needs to be a person, or maybe even an AI agent, that decides for them based on their learning status.
+
+
 
 ## Experts
 
@@ -36,15 +38,40 @@ This section is a curated list of the leading thinkers, researchers, and practit
 ### Expert 1
 
 - **Who:** Andrew Ng
-- **Focus:** [Describe their primary area of expertise and the main views or theories they are known for.]
-- **Why Follow:** [Explain specifically how this expert's work informs your BrainLift's purpose and helps build your own insights and SPOVs.]
-- **Where:** [Provide links to their work, such as a personal website, X profile, LinkedIn, Substack, or Google Scholar page.]
+- **Focus:** Machine learning and the democratization of education at scale. Co-founder of Coursera and founder of DeepLearning.AI, Ng pioneered the modern MOOC and is a leading voice on using AI as an augmentation tool that lowers the barrier to learning rather than replacing human effort.
+- **Why Follow:** His work proves that high-quality instruction can be delivered to millions through software, and his framing of AI as "a tool to amplify human capability" directly informs this BrainLift's purpose of building AI integrations that make learning easier without removing the cognitive work that produces real understanding.
+- **Where:** [deeplearning.ai](https://www.deeplearning.ai/), [X (@AndrewYNg)](https://x.com/AndrewYNg), [Google Scholar](https://scholar.google.com/citations?user=mG4imMEAAAAJ)
+
+### Expert 2
+
+- **Who:** Sal Khan
+- **Focus:** Mastery-based learning and applied AI tutoring at scale. Founder of Khan Academy and creator of Khanmigo, an AI tutor explicitly designed to ask guiding questions and withhold direct answers. A prominent advocate of solving Bloom's "2 sigma problem" (the gap between classroom and one-on-one tutoring) with technology.
+- **Why Follow:** Khanmigo is the clearest real-world implementation of a Socratic AI tutor that refuses to hand over answers, which is direct evidence for the DOK 3 insight that AI must guide rather than tell in order to preserve durable learning. His mastery-learning model also grounds the case for adaptive, periodically-assessed learning paths.
+- **Where:** [Khan Academy](https://www.khanacademy.org/), book *Brave New Words* (2024), [X (@salkhanacademy)](https://x.com/salkhanacademy)
+
+### Expert 3
+
+- **Who:** Barbara Oakley
+- **Focus:** The neuroscience and practice of learning. Creator of "Learning How to Learn," one of the most popular online courses ever, and author of works on chunking, focused vs. diffuse thinking, and spaced repetition as concrete, teachable study techniques.
+- **Why Follow:** Her popularization of spaced repetition and chunking provides the cognitive-science foundation for the spaced-repetition and microlearning branches of the Knowledge Tree, translating dense research into the practical mechanics this app needs to implement.
+- **Where:** [barbaraoakley.com](https://barbaraoakley.com/), [Learning How to Learn (Coursera)](https://www.coursera.org/learn/learning-how-to-learn), [X (@barbaraoakley)](https://x.com/barbaraoakley)
+
+### Expert 4
+
+- **Who:** Robert Bjork
+- **Focus:** Memory and the science of "desirable difficulties." Director of the UCLA Bjork Learning and Forgetting Lab, known for the critical distinction between *learning* and *performance* and for showing that effortful retrieval and spacing strengthen long-term retention even when they feel harder in the moment.
+- **Why Follow:** His finding that current performance is a poor proxy for actual learning is the research backbone of the DOK 3 insight that learning must be measured by transfer to novel problems, and his "desirable difficulties" work justifies why an AI tutor should preserve struggle instead of smoothing it away.
+- **Where:** [Bjork Learning and Forgetting Lab](https://bjorklab.psych.ucla.edu/), [Google Scholar](https://scholar.google.com/citations?user=0FFkfHcAAAAJ)
+
+
 
 ## DOK 3: Insights
 
-- **Insight 1:** People can learn more in less time using strategies that optimize how their psychology works. For example, adaptive learning dynamically modifies lessons to be in-line with how different students are performing and how they learn; spaced repitition promotes learning retention by reintroducing concepts periodically; micro-learning minimizes the costs of working memory overflow by not overworking the brain and splitting topics into manageble micro-lessons.
-- **Insight 2:** AI can be a very effective teacher only if it is done correctly. Truth checkers are necessary to keep the AI grounded, unchecked AI's can generate problems that don't match users, AI needs to withhold answers to imrpove learning, and AI's must ensure users engage actively rather than passively listen to it; oftentimes, they need other engagement mechanisms to be effective. If these factors are controlled, AI can match or beat human tutors in creating unique practice questions, giving good hints that guide users to insight, and providing useful feedback. AI can remove the effort and cognitive dissonance necessary to learning, which is why it must be used correctly to ensure that students are challenged sufficiently rather than being hand-held.
-- **Insight 3:** Learning is not signaled by engagement, nor by performance; the best way to evaluate learning is knowledge application to complex problems that differ from the practice's precise wording/presentation. Students can memorize the definition of a word, but if they can't properly use it in a sentence, they didn't learn the word. To verify somebody truly understands a concept, it is necessary to test them in ways that make them think outside of the box and use multiple concpets to solve the same problem.
+- **Insight 1:** People can learn more in less time using strategies that optimize how their psychology works. For example, adaptive learning dynamically modifies lessons to be in-line with how different students are performing and how they learn; spaced repetition promotes learning retention by reintroducing concepts periodically; micro-learning minimizes the costs of working memory overflow by not overworking the brain and splitting topics into manageable micro-lessons.
+- **Insight 2:** AI can be a very effective teacher only if it is done correctly. Truth checkers are necessary to keep the AI grounded, unchecked AI's can generate problems that don't match users, AI needs to withhold answers to improve learning, and AI's must ensure users engage actively rather than passively listen to it; oftentimes, they need other engagement mechanisms to be effective. If these factors are controlled, AI can match or beat human tutors in creating unique practice questions, giving good hints that guide users to insight, and providing useful feedback. AI can remove the effort and cognitive dissonance necessary to learning, which is why it must be used correctly to ensure that students are challenged sufficiently rather than being hand-held.
+- **Insight 3:** Learning is not signaled by engagement, nor by performance; the best way to evaluate learning is knowledge application to complex problems that differ from the practice's precise wording/presentation. Students can memorize the definition of a word, but if they can't properly use it in a sentence, they don't learn the word. To verify somebody truly understands a concept, it is necessary to test them in ways that make them think outside of the box and use multiple concepts to solve the same problem.
+
+
 
 ## DOK 2: Knowledge Tree
 
@@ -55,6 +82,8 @@ The Knowledge Tree is the structured foundation of your entire BrainLift (Depth 
 The Knowledge Tree is organized from broad categories to specific facts. It directly supports the creation of Insights (DOK 3) by providing the organized, summarized information your brain needs to make new connections. Without a well-structured Knowledge Tree, it is nearly impossible to build robust, evidence-based insights and SPOVs.
 
 ### Category 1: Cognitive Optimization in Educational Technology
+
+
 
 #### Subcategory 1.1: Spaced Repetition Systems
 
@@ -68,7 +97,7 @@ The Knowledge Tree is organized from broad categories to specific facts. It dire
 
 *DOK 2 - Summary:*
 
-- Spaced repition results in better retention than traditional modular learning.
+- Spaced repetition results in better retention than traditional modular learning.
 
 [Link to source](https://pubmed.ncbi.nlm.nih.gov/39250798/)
 
@@ -82,7 +111,7 @@ The Knowledge Tree is organized from broad categories to specific facts. It dire
 
 *DOK 2 - Summary:*
 
-- Data from 10s of thousands of students shows how effective spaced repitition is.
+- Data from tens of thousands of students shows how effective spaced repetition is.
 
 [Link to source](https://www.researchgate.net/publication/394819697_Microlearning_in_Mathematics_Education_Impacts_on_Student_Retention_and_Cognitive_Load)
 
@@ -102,6 +131,8 @@ The Knowledge Tree is organized from broad categories to specific facts. It dire
 [Link to source](https://www.researchgate.net/publication/394819697_Microlearning_in_Mathematics_Education_Impacts_on_Student_Retention_and_Cognitive_Load)
 
 ### Category 2: Behavioral Dynamics & Personalization
+
+
 
 #### Subcategory 2.1: Gamification Mechanics
 
@@ -134,6 +165,8 @@ The Knowledge Tree is organized from broad categories to specific facts. It dire
 [Link to source](https://www.researchgate.net/publication/386544201_Personalizing_Learning_Paths_A_Study_of_Adaptive_Learning_Algorithms_and_Their_Effects_on_Student_Outcomes)
 
 ### Category 3: AI-Augmented Learning
+
+
 
 #### Subcategory 3.1: Intelligent Tutoring Systems (Baseline Effectiveness)
 

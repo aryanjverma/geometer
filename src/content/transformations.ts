@@ -56,6 +56,12 @@ export const transformationsLesson: Lesson = {
       },
     },
     {
+      id: 'transition-wedo',
+      type: 'transition',
+      prompt: "Now let's perform a transformation together.",
+      transition: { emoji: '\u{1F60A}', cta: "Let's do it" },
+    },
+    {
       id: 'guided-translate',
       type: 'transform-guided',
       tag: 'We do',

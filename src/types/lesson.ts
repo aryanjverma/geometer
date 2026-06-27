@@ -24,7 +24,12 @@ type StepType =
   | 'congruence-check'
   | 'similarity-check'
   | 'shape-match'
-  | 'coordinate-rule';
+  | 'coordinate-rule'
+  | 'find-angle'
+  | 'triangle-angle'
+  | 'solid-volume'
+  | 'cone-radius-slice'
+  | 'cone-radius-volume';
 
 interface StepFeedback {
   correct?: string;
@@ -87,6 +92,8 @@ export interface GuidedPart {
   answer?: number;
   /** When true, multi-field answers may be entered in any order. */
   acceptAnyOrder?: boolean;
+  /** Optional per-part angle figure (e.g. each We-do sub-step highlights different angles). */
+  angleFigure?: AngleFigure;
   feedback?: StepFeedback;
 }
 
@@ -94,7 +101,12 @@ interface DemoContent {
   intro?: string;
   reveals: DemoReveal[];
   /** Optional embedded interactive widget. */
-  interactive?: 'shear' | 'parallelogram';
+  interactive?:
+    | 'shear'
+    | 'parallelogram'
+    | 'slide-angles'
+    | 'exterior-angle'
+    | 'slice-cone';
 }
 
 /** A full-slide transition message shown between lesson phases. */
@@ -234,6 +246,62 @@ export interface MatchContent {
   allow: Array<'translate' | 'rotate' | 'dilate'>;
 }
 
+/** A single label placed at a named slot on an angle/solid figure. */
+export interface FigureLabel {
+  /**
+   * Named position the figure draws this label at. For `parallel-lines` figures
+   * the slots are the eight angle positions `t1`..`t4` (top intersection) and
+   * `b1`..`b4` (bottom intersection). For `triangle` / `exterior-triangle`
+   * figures the slots are vertices `A`, `B`, `C` and the exterior slot `ext`.
+   * For solids the slots are dimension labels such as `r`, `h`, `l`.
+   */
+  at: string;
+  /** Display text — a degree/length value or the literal `?` for the unknown. */
+  text: string;
+  /** When true the figure highlights this label (e.g. the angle being solved). */
+  highlight?: boolean;
+  /**
+   * When true the label stays hidden as a `?` until the step is solved, then
+   * pops its value in with the shared reveal animation. Used for the answer a
+   * guided walkthrough builds toward.
+   */
+  revealOnSolve?: boolean;
+  /** Pixel nudge of the label from its default slot position (SVG: +y is down). */
+  offset?: { dx?: number; dy?: number };
+}
+
+/**
+ * A labeled angle figure for the angles/lines and triangle-angle lessons.
+ * `answer` on the owning `LessonStep` always carries the ground-truth measure;
+ * the figure is purely presentational and one label is the literal `?`.
+ */
+export interface AngleFigure {
+  kind: 'parallel-lines' | 'triangle' | 'exterior-triangle';
+  /**
+   * Acute angle (degrees) the transversal/sides make with the parallel lines or
+   * base; used only to draw the figure to a believable scale.
+   */
+  baseAngle?: number;
+  labels?: FigureLabel[];
+}
+
+/**
+ * A pseudo-3D circular solid for the 3D-solids lesson. The figure is drawn from
+ * `radius` / `height` / `slant`; one dimension may be unknown (shown as `?` in
+ * `labels`), and `answer` on the owning step carries the ground truth. Volumes
+ * are answered as the integer coefficient of pi to keep exact-match grading.
+ */
+export interface SolidFigure {
+  kind: 'cylinder' | 'cone' | 'sphere';
+  radius?: number;
+  height?: number;
+  /** Slant height of a cone (the hypotenuse of the radius/height triangle). */
+  slant?: number;
+  /** Measurement unit drawn on the figure, e.g. "cm". */
+  unit?: string;
+  labels?: FigureLabel[];
+}
+
 export interface LessonStep {
   id: string;
   type: StepType;
@@ -241,6 +309,12 @@ export interface LessonStep {
   /** On-screen phase label for the gradual-release arc. */
   tag?: 'I do' | 'We do' | 'You do';
   answer?: number;
+  /**
+   * Second graded answer for multi-stage solid problems (cone-radius-volume):
+   * `answer` holds the recovered radius, `volumeAnswer` the integer coefficient
+   * of pi for the volume the learner computes from it.
+   */
+  volumeAnswer?: number;
   formula?: string;
   triangle?: TriangleLegs | TrianglePartial | TriangleGeneral;
   parts?: MultiPart[];
@@ -262,6 +336,10 @@ export interface LessonStep {
   transform?: TransformContent;
   /** Drag-to-match proof data (shape-match). */
   match?: MatchContent;
+  /** Labeled angle figure (find-angle / triangle-angle). */
+  angleFigure?: AngleFigure;
+  /** Pseudo-3D circular solid (solid-volume / cone-radius-slice). */
+  solid?: SolidFigure;
 }
 
 export interface Lesson {

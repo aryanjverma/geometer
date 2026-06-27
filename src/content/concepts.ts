@@ -36,6 +36,24 @@ export const CONCEPTS_BY_LESSON: Record<string, Concept[]> = {
     { conceptId: 'cs-side-length', lessonId: 'congruence-similarity', label: 'Find a side length', stepId: 'q5-side-length' },
     { conceptId: 'cs-scale-ratio', lessonId: 'congruence-similarity', label: 'Find the scale ratio', stepId: 'q6-scale-ratio' },
   ],
+  'angles-lines': [
+    { conceptId: 'al-vertical-angles', lessonId: 'angles-lines', label: 'Vertical angles', stepId: 'q1-vertical-angles' },
+    { conceptId: 'al-linear-pair', lessonId: 'angles-lines', label: 'Linear pair', stepId: 'q2-linear-pair' },
+    { conceptId: 'al-corresponding-angle', lessonId: 'angles-lines', label: 'Corresponding angles', stepId: 'q3-corresponding-angle' },
+    { conceptId: 'al-missing-angle', lessonId: 'angles-lines', label: 'Combined missing angle', stepId: 'q4-missing-angle' },
+  ],
+  'triangle-angles': [
+    { conceptId: 'ta-exterior-sum', lessonId: 'triangle-angles', label: 'Exterior angle from remote interiors', stepId: 'q1-exterior-sum' },
+    { conceptId: 'ta-remote-interior', lessonId: 'triangle-angles', label: 'Remote interior from exterior', stepId: 'q2-remote-interior' },
+    { conceptId: 'ta-parallel-triangle', lessonId: 'triangle-angles', label: 'Parallel lines with a triangle', stepId: 'q3-parallel-triangle' },
+    { conceptId: 'ta-parallel-triangle-x', lessonId: 'triangle-angles', label: 'Combined angle in a triangle', stepId: 'q4-parallel-triangle-x' },
+  ],
+  'solids-3d': [
+    { conceptId: 's3-cylinder-volume', lessonId: 'solids-3d', label: 'Volume of a cylinder', stepId: 'q1-cylinder-volume' },
+    { conceptId: 's3-cone-volume', lessonId: 'solids-3d', label: 'Volume of a cone', stepId: 'q2-cone-volume' },
+    { conceptId: 's3-sphere', lessonId: 'solids-3d', label: 'Volume of a sphere', stepId: 'q3-sphere' },
+    { conceptId: 's3-cone-radius', lessonId: 'solids-3d', label: 'Cone radius from a slice', stepId: 'q4-cone-radius-volume' },
+  ],
 };
 
 /** All concepts for one lesson, or an empty list for an unknown lesson. */

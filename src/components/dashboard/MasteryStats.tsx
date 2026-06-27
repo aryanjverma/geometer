@@ -5,15 +5,27 @@ import type { ConceptMasteryMap } from '@/types/review';
 interface MasteryStatsProps {
   conceptMastery: ConceptMasteryMap;
   streak: number;
+  rank?: number | null;
+  totalRanked?: number;
 }
 
 /**
  * Top dashboard stat strip: overall mastery percent, the per-level concept
  * totals, and a streak tile that links to the leaderboard.
  */
-export function MasteryStats({ conceptMastery, streak }: MasteryStatsProps) {
+export function MasteryStats({
+  conceptMastery,
+  streak,
+  rank,
+  totalRanked,
+}: MasteryStatsProps) {
   const percent = masteryPercent(conceptMastery);
   const totals = masteryTotals(conceptMastery);
+  const isRanked = typeof rank === 'number' && rank > 0;
+  const streakLabel = `${streak} day streak`;
+  const ariaLabel = isRanked
+    ? `${streakLabel}, ranked #${rank} of ${totalRanked}. View leaderboard.`
+    : `${streakLabel}. View leaderboard.`;
 
   return (
     <section className="mastery-stats" aria-label="Your progress">
@@ -50,12 +62,21 @@ export function MasteryStats({ conceptMastery, streak }: MasteryStatsProps) {
       <Link
         to="/leaderboard"
         className="stat-tile streak-widget"
-        aria-label={`${streak} day streak. View leaderboard.`}
+        aria-label={ariaLabel}
       >
         <span className="streak-flame" aria-hidden="true">{'\u{1F525}'}</span>
         <span className="streak-widget-count">{streak}</span>
         <span className="streak-widget-label">
           day{streak === 1 ? '' : 's'} streak
+        </span>
+        <span className="streak-rank">
+          {isRanked ? (
+            <>
+              <span className="streak-rank-place">#{rank}</span> of {totalRanked}
+            </>
+          ) : (
+            'Not ranked yet'
+          )}
         </span>
         <span className="streak-widget-cta">View leaderboard</span>
       </Link>

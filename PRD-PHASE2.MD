@@ -15,8 +15,9 @@ AI **never generates the underlying questions, never picks what to review, and n
 
 **Scope (confirmed):**
 
-- Review covers the **numeric/computational lessons only**: `right-triangles`, `non-right-triangles`, `distance-coordinate-plane`.
-- The drag/geometry lessons (`transformations`, `congruence-similarity`) are **out of scope** for Phase 2 review formats (see Out of Scope).
+- Review covers **every lesson's "You do" concepts** across the full Phase 1 course (8 lessons): `right-triangles`, `non-right-triangles`, `distance-coordinate-plane`, `transformations`, `congruence-similarity`, and the three lessons added since this PRD was first drafted — `angles-lines`, `triangle-angles`, and `solids-3d`. Each You-do concept has a deterministic, parameterized question format (26 formats total).
+- Because the drag/geometry and abstract-coordinate concepts don't lend themselves to numeric retrieval drills, they are reviewed as **single-answer numeric drills** that extract the underlying computation (e.g. a transformation becomes "find the image's x-coordinate"; a congruence step becomes "find the hypotenuse / scale factor"). These drills are still rendered and graded by the existing `StepRenderer`.
+- **Reskinnability is per-format, not per-lesson.** A format carries an optional `reskinnable` flag (default `true`). Formats whose signed/coordinate numbers or sign-flipping answers wouldn't survive the number-preservation validator — distance, transformations, angles/lines, triangle angles, and 3D-solids formats — are marked `reskinnable: false` and always show the plain prompt; AI reskinning applies only to the right-triangle, non-right-triangle, and congruence/similarity formats. Ask Geometer hints remain available on every format.
 - AI provider: **OpenAI** `gpt-4o-mini`**, called through a secure Firebase Cloud Function proxy** (the OpenAI API key stays server-side and is never shipped in the client bundle).
 
 
@@ -53,7 +54,7 @@ Same persona as Phase 1 (8th graders, hands-on, self-paced).
 | Post-session lesson recommendations       | **Deterministic**          | Each missed concept maps directly to its source `lessonId`                                                                                               |
 | The actual question numbers and answer    | **Deterministic**          | Parameterized question formats with curated number sets + ground-truth solver                                                                            |
 | Correctness of every answer               | **Deterministic**          | Ground-truth solver per format (integer exact-match, tolerance 0)                                                                                        |
-| Word-problem narrative (the "skin")       | **AI**                     | OpenAI `gpt-4o-mini` (via Cloud Function) rewrites the template prompt as an interest-themed word problem; numbers/answer unchanged                      |
+| Word-problem narrative (the "skin")       | **AI**                     | OpenAI `gpt-4o-mini` (via Cloud Function) rewrites the template prompt as an interest-themed word problem; numbers/answer unchanged. Applies only to `reskinnable` formats; non-reskinnable formats (coordinate/angle/solid drills) always use the plain prompt |
 | In-session hint when stuck (Ask Geometer) | **AI**                     | OpenAI `gpt-4o-mini` (via Cloud Function) writes ONE hint grounded in step state plus the learner's stated struggle; forbidden from revealing the answer |
 | Behavior when AI is unavailable           | **Deterministic fallback** | Plain template prompt instead of a word problem; hand-written Phase 1 hint instead of an Ask Geometer hint                                               |
 
@@ -104,7 +105,7 @@ FRs are ordered by build priority. Each is a checkpoint: complete it, verify acc
 **Scope:**
 
 - New Firestore subcollection `users/{uid}/conceptMastery/{conceptId}` where `conceptId = "${lessonId}__${stepId}"` (the stable Phase 1 slugs; this is the "lesson # and step #" identifier).
-- Record **only "You do" steps** in the three in-scope lessons. "We do" and "I do" steps are never recorded. You-do steps are identified by a `YOU_DO_STEPS` registry (lessonId → stepIds) and/or `step.tag === 'You do'`.
+- Record **only "You do" steps** across all in-scope lessons (the full 8-lesson course). "We do" and "I do" steps are never recorded. You-do steps are identified by a `YOU_DO_STEPS` registry (lessonId → stepIds) and/or `step.tag === 'You do'`.
 - Each document is a **per-concept mastery record** (one doc per concept, updated in place) holding the identifier, a short rolling list of recent correctness flags, and when the concept was last reviewed. We **do not** store the learner's actual answers, attempt counts, or a per-answer log.
 - Writes happen on answer submission for You-do steps: push the latest correctness flag onto `recentCorrect` (capped at the last 2, newest last) and set `lastReviewedAt`. This requires instrumenting the answer-submit path (today wrong answers stay local in step components and only correct answers advance via `setStep`) — but only the **correctness** of each attempt is recorded, never the answer itself.
 
@@ -161,24 +162,32 @@ interface QuestionFormat {
   lessonId: string;                 // concept this reviews
   sourceStepId: string;             // Phase 1 step it derives from
   label: string;                    // human concept label, e.g. "Find the hypotenuse"
-  generate(): GeneratedQuestion;    // plug params -> concrete, solved question
+  reskinnable?: boolean;            // default true; false for coordinate/angle/solid drills
+  generate(rng?: () => number): GeneratedQuestion; // plug params -> concrete, solved question
 }
 
 interface GeneratedQuestion {
   formatId: string;
+  lessonId: string;
   step: LessonStep;                 // ephemeral, reuses StepRenderer (holds ground-truth answer)
   params: Record<string, number>;   // the numbers plugged in
   basePrompt: string;               // plain template prompt; AI reskin replaces only the display text
+  answer: number;                   // ground-truth answer, used by the hint answer-leak filter
 }
 ```
 
-**Initial format catalog (one per in-scope You-do concept, ~8 formats):**
+**Format catalog (one per You-do concept across all 8 lessons, 26 formats — see** `src/content/reviewFormats.ts`**):**
 
 - `right-triangles`: find hypotenuse (Pythagorean triple set), right-triangle area (legs × ½), missing leg → perimeter, missing leg → area.
 - `non-right-triangles`: area from base × height, perimeter from split base + sides.
-- `distance-coordinate-plane`: distance between two points (integer-delta triples), perimeter of a coordinate triangle.
+- `distance-coordinate-plane` *(non-reskinnable)*: distance between two points (integer-delta triples), perimeter of a coordinate triangle.
+- `transformations` *(non-reskinnable, coordinate-rule drills)*: translate / reflect / rotate / dilate a point → new x-coordinate.
+- `congruence-similarity`: find a side length (Pythagorean triple), find the scale ratio.
+- `angles-lines` *(non-reskinnable, find-angle drills)*: vertical angles, linear pair, corresponding angles, combined missing angle.
+- `triangle-angles` *(non-reskinnable, triangle-angle drills)*: exterior angle from remote interiors, remote interior from exterior, parallel lines with a triangle, combined angle in a triangle.
+- `solids-3d` *(non-reskinnable, π-coefficient & slice drills)*: cylinder volume, cone volume, sphere volume, cone radius from a slice (Pythagorean).
 
-**Out of scope for this FR:** AI reskinning/hints, dashboard card, results screen, drag/geometry formats.
+**Out of scope for this FR:** AI reskinning/hints, dashboard card, results screen.
 
 **Acceptance criteria:**
 

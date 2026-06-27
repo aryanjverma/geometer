@@ -104,7 +104,6 @@ export const nonRightTrianglesLesson: Lesson = {
     {
       id: 'q1-area-base-height',
       type: 'area-base-height',
-      formula: 'Area $= \\frac{bh}{2}$',
       prompt: 'A triangle has base $4$ and height $3$. What is its area?',
       triangle: { base: 4, height: 3 },
       answer: 6,

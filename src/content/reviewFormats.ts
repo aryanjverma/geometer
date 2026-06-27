@@ -92,6 +92,25 @@ const NRT = 'non-right-triangles';
 const DIST = 'distance-coordinate-plane';
 const TRANS = 'transformations';
 const CS = 'congruence-similarity';
+const AL = 'angles-lines';
+const TA = 'triangle-angles';
+const S3 = 'solids-3d';
+
+/**
+ * Curated cone (radius, height) pairs whose volume coefficient r^2*h/3 is a
+ * whole number, so the pi-coefficient answer stays an exact integer.
+ */
+export const CONE_VOLUME_CONFIGS: ReadonlyArray<{ r: number; h: number }> = [
+  { r: 3, h: 7 },
+  { r: 3, h: 5 },
+  { r: 3, h: 4 },
+  { r: 3, h: 8 },
+  { r: 6, h: 2 },
+  { r: 6, h: 4 },
+];
+
+/** Sphere radii whose volume coefficient 4*r^3/3 is a whole number. */
+export const SPHERE_VOLUME_RADII: ReadonlyArray<number> = [3, 6];
 
 export const YOU_DO_STEPS: Record<string, string[]> = {
   [RT]: ['q1-hypotenuse', 'q2-area', 'q3-leg-then-perimeter', 'q4-leg-then-area'],
@@ -99,6 +118,9 @@ export const YOU_DO_STEPS: Record<string, string[]> = {
   [DIST]: ['q1-distance', 'q2-perimeter', 'q3-right-triangle', 'q4-journey'],
   [TRANS]: ['q5-translate-point', 'q6-reflect-point', 'q7-rotate-point', 'q8-dilate-point'],
   [CS]: ['q5-side-length', 'q6-scale-ratio'],
+  [AL]: ['q1-vertical-angles', 'q2-linear-pair', 'q3-corresponding-angle', 'q4-missing-angle'],
+  [TA]: ['q1-exterior-sum', 'q2-remote-interior', 'q3-parallel-triangle', 'q4-parallel-triangle-x'],
+  [S3]: ['q1-cylinder-volume', 'q2-cone-volume', 'q3-sphere', 'q4-cone-radius-volume'],
 };
 
 function make(
@@ -632,6 +654,452 @@ const csScaleRatio = make(
   },
 );
 
+// ---------------------------------------------------------------------------
+// Angles and lines — find-angle drills (integer degrees)
+// ---------------------------------------------------------------------------
+
+const alVerticalAngles = make(
+  {
+    formatId: 'al-vertical-angles',
+    lessonId: AL,
+    reskinnable: false,
+    sourceStepId: 'q1-vertical-angles',
+    label: 'Vertical angles',
+  },
+  (rng) => {
+    const given = randInt(rng, 20, 160);
+    const basePrompt = `Two lines cross. One angle measures ${given} degrees. Use the Vertical Angles Theorem to find the angle directly opposite it.`;
+    const step: LessonStep = {
+      id: 'review-al-vertical-angles',
+      type: 'find-angle',
+      prompt: basePrompt,
+      angleFigure: {
+        kind: 'parallel-lines',
+        baseAngle: 50,
+        labels: [
+          { at: 't1', text: String(given), offset: { dx: -8, dy: 8 } },
+          { at: 't3', text: '?', highlight: true, offset: { dx: 7 } },
+        ],
+      },
+      answer: given,
+      feedback: {
+        correct: `Vertical angles are equal, so the angle is $${given}^\\circ$.`,
+        wrong: 'Angles directly opposite each other at a crossing are equal.',
+        hint: 'The unknown angle is vertical to the given one, so it has the same measure.',
+      },
+    };
+    return { step, params: { given }, basePrompt, answer: given };
+  },
+);
+
+const alLinearPair = make(
+  {
+    formatId: 'al-linear-pair',
+    lessonId: AL,
+    reskinnable: false,
+    sourceStepId: 'q2-linear-pair',
+    label: 'Linear pair',
+  },
+  (rng) => {
+    const given = randInt(rng, 20, 160);
+    const answer = 180 - given;
+    const basePrompt = `Two angles form a linear pair on a straight line. One measures ${given} degrees. Find the other angle.`;
+    const step: LessonStep = {
+      id: 'review-al-linear-pair',
+      type: 'find-angle',
+      prompt: basePrompt,
+      angleFigure: {
+        kind: 'parallel-lines',
+        baseAngle: 60,
+        labels: [
+          { at: 't1', text: String(given) },
+          { at: 't2', text: '?', highlight: true },
+        ],
+      },
+      answer,
+      feedback: {
+        correct: `A linear pair is supplementary, so $180 - ${given} = ${answer}$.`,
+        wrong: 'The two angles lie on one line, so they add to $180^\\circ$.',
+        hint: 'Subtract the given angle from $180^\\circ$.',
+      },
+    };
+    return { step, params: { given }, basePrompt, answer };
+  },
+);
+
+const alCorresponding = make(
+  {
+    formatId: 'al-corresponding-angle',
+    lessonId: AL,
+    reskinnable: false,
+    sourceStepId: 'q3-corresponding-angle',
+    label: 'Corresponding angles',
+  },
+  (rng) => {
+    const given = randInt(rng, 20, 160);
+    const basePrompt = `Two parallel lines are cut by a transversal. A corresponding angle at the upper crossing measures ${given} degrees. Find its corresponding angle at the lower crossing.`;
+    const step: LessonStep = {
+      id: 'review-al-corresponding-angle',
+      type: 'find-angle',
+      prompt: basePrompt,
+      angleFigure: {
+        kind: 'parallel-lines',
+        baseAngle: 55,
+        labels: [
+          { at: 't1', text: String(given) },
+          { at: 'b1', text: '?', highlight: true },
+        ],
+      },
+      answer: given,
+      feedback: {
+        correct: `Corresponding angles across parallel lines are equal, so the angle is $${given}^\\circ$.`,
+        wrong: 'Corresponding angles occupy the same position at each crossing and are equal.',
+        hint: 'Both angles are upper-left at their crossings, so they match.',
+      },
+    };
+    return { step, params: { given }, basePrompt, answer: given };
+  },
+);
+
+const alMissingAngle = make(
+  {
+    formatId: 'al-missing-angle',
+    lessonId: AL,
+    reskinnable: false,
+    sourceStepId: 'q4-missing-angle',
+    label: 'Combined missing angle',
+  },
+  (rng) => {
+    const given = randInt(rng, 20, 160);
+    const answer = 180 - given;
+    const basePrompt = `Two parallel lines are cut by a transversal. An upper-left angle measures ${given} degrees. Find the lower-right angle, which is the supplement carried down by corresponding angles.`;
+    const step: LessonStep = {
+      id: 'review-al-missing-angle',
+      type: 'find-angle',
+      prompt: basePrompt,
+      angleFigure: {
+        kind: 'parallel-lines',
+        baseAngle: 65,
+        labels: [
+          { at: 't1', text: String(given) },
+          { at: 'b2', text: '?', highlight: true },
+        ],
+      },
+      answer,
+      feedback: {
+        correct: `The upper-right angle is $180 - ${given} = ${answer}$ by a linear pair, and its corresponding angle below matches.`,
+        wrong: 'Take the supplement of the given angle, then carry it down with corresponding angles.',
+        hint: 'Find the supplement first, then apply the Corresponding Angles Postulate.',
+      },
+    };
+    return { step, params: { given }, basePrompt, answer };
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Triangle angles — exterior angle + parallel-line drills (integer degrees)
+// ---------------------------------------------------------------------------
+
+const taExteriorSum = make(
+  {
+    formatId: 'ta-exterior-sum',
+    lessonId: TA,
+    reskinnable: false,
+    sourceStepId: 'q1-exterior-sum',
+    label: 'Exterior angle from remote interiors',
+  },
+  (rng) => {
+    const a = randInt(rng, 20, 80);
+    const b = randInt(rng, 20, 80);
+    const answer = a + b;
+    const basePrompt = `The base of a triangle is extended to form an exterior angle. The two remote interior angles measure ${a} degrees and ${b} degrees. Find the exterior angle.`;
+    const step: LessonStep = {
+      id: 'review-ta-exterior-sum',
+      type: 'triangle-angle',
+      prompt: basePrompt,
+      angleFigure: {
+        kind: 'exterior-triangle',
+        baseAngle: 55,
+        labels: [
+          { at: 'A', text: `$${a}^\\circ$` },
+          { at: 'B', text: `$${b}^\\circ$` },
+          { at: 'ext', text: '?', highlight: true },
+        ],
+      },
+      answer,
+      feedback: {
+        correct: `$${a}^\\circ + ${b}^\\circ = ${answer}^\\circ$`,
+        wrong: 'The exterior angle equals the sum of the two remote interior angles.',
+        hint: 'Add the two remote interior angles.',
+      },
+    };
+    return { step, params: { a, b }, basePrompt, answer };
+  },
+);
+
+const taRemoteInterior = make(
+  {
+    formatId: 'ta-remote-interior',
+    lessonId: TA,
+    reskinnable: false,
+    sourceStepId: 'q2-remote-interior',
+    label: 'Remote interior from exterior',
+  },
+  (rng) => {
+    const ext = randInt(rng, 70, 150);
+    const b = randInt(rng, 20, ext - 20);
+    const answer = ext - b;
+    const basePrompt = `An exterior angle of a triangle measures ${ext} degrees. One remote interior angle measures ${b} degrees. Find the other remote interior angle.`;
+    const step: LessonStep = {
+      id: 'review-ta-remote-interior',
+      type: 'triangle-angle',
+      prompt: basePrompt,
+      angleFigure: {
+        kind: 'exterior-triangle',
+        baseAngle: 55,
+        labels: [
+          { at: 'A', text: '?', highlight: true },
+          { at: 'B', text: `$${b}^\\circ$` },
+          { at: 'ext', text: `$${ext}^\\circ$` },
+        ],
+      },
+      answer,
+      feedback: {
+        correct: `$${ext}^\\circ - ${b}^\\circ = ${answer}^\\circ$`,
+        wrong: 'Subtract the known remote interior angle from the exterior angle.',
+        hint: 'The exterior angle equals the sum of the two remote interior angles.',
+      },
+    };
+    return { step, params: { ext, b }, basePrompt, answer };
+  },
+);
+
+const taParallelTriangle = make(
+  {
+    formatId: 'ta-parallel-triangle',
+    lessonId: TA,
+    reskinnable: false,
+    sourceStepId: 'q3-parallel-triangle',
+    label: 'Parallel lines with a triangle',
+  },
+  (rng) => {
+    const a = randInt(rng, 30, 70);
+    const b = randInt(rng, 30, 70);
+    const answer = 180 - a - b;
+    const basePrompt = `A ray through one vertex is parallel to the opposite side, which gives a triangle angle of ${b} degrees. With another interior angle equal to ${a} degrees, find the third interior angle.`;
+    const step: LessonStep = {
+      id: 'review-ta-parallel-triangle',
+      type: 'triangle-angle',
+      prompt: basePrompt,
+      angleFigure: {
+        kind: 'exterior-triangle',
+        baseAngle: 55,
+        labels: [
+          { at: 'A', text: `$${a}^\\circ$` },
+          { at: 'B', text: `$${b}^\\circ$` },
+          { at: 'C', text: '?', highlight: true },
+        ],
+      },
+      answer,
+      feedback: {
+        correct: `The interior angles sum to $180^\\circ$, so $180 - ${a} - ${b} = ${answer}$.`,
+        wrong: 'Use the parallel ray to find the second angle, then apply the triangle angle sum.',
+        hint: 'The three interior angles of a triangle sum to $180^\\circ$.',
+      },
+    };
+    return { step, params: { a, b }, basePrompt, answer };
+  },
+);
+
+const taParallelTriangleX = make(
+  {
+    formatId: 'ta-parallel-triangle-x',
+    lessonId: TA,
+    reskinnable: false,
+    sourceStepId: 'q4-parallel-triangle-x',
+    label: 'Combined angle in a triangle',
+  },
+  (rng) => {
+    const ext = randInt(rng, 80, 150);
+    const b = randInt(rng, 20, ext - 30);
+    const answer = ext - b;
+    const basePrompt = `A ray parallel to one side makes a corresponding angle of ${b} degrees, equal to one interior angle. The base is extended to form an exterior angle of ${ext} degrees. Find the remaining remote interior angle.`;
+    const step: LessonStep = {
+      id: 'review-ta-parallel-triangle-x',
+      type: 'triangle-angle',
+      prompt: basePrompt,
+      angleFigure: {
+        kind: 'exterior-triangle',
+        baseAngle: 55,
+        labels: [
+          { at: 'A', text: '?', highlight: true },
+          { at: 'B', text: `$${b}^\\circ$` },
+          { at: 'ext', text: `$${ext}^\\circ$` },
+        ],
+      },
+      answer,
+      feedback: {
+        correct: `The corresponding angle gives one remote interior of $${b}^\\circ$, so $${ext} - ${b} = ${answer}$.`,
+        wrong: 'Find the known remote interior from the corresponding angle, then subtract it from the exterior angle.',
+        hint: 'The exterior angle equals the sum of the two remote interior angles.',
+      },
+    };
+    return { step, params: { ext, b }, basePrompt, answer };
+  },
+);
+
+// ---------------------------------------------------------------------------
+// Circular 3D solids — volume (pi-coefficient) + cone radius drills
+// ---------------------------------------------------------------------------
+
+const s3CylinderVolume = make(
+  {
+    formatId: 's3-cylinder-volume',
+    lessonId: S3,
+    reskinnable: false,
+    sourceStepId: 'q1-cylinder-volume',
+    label: 'Volume of a cylinder',
+  },
+  (rng) => {
+    const radius = randInt(rng, 2, 6);
+    const height = randInt(rng, 2, 8);
+    const answer = radius * radius * height;
+    const basePrompt = `A cylinder has radius ${radius} cm and height ${height} cm. Its volume is how many cubic centimeters of pi? (Give the whole number multiplied by pi.)`;
+    const step: LessonStep = {
+      id: 'review-s3-cylinder-volume',
+      type: 'solid-volume',
+      prompt: basePrompt,
+      solid: {
+        kind: 'cylinder',
+        radius,
+        height,
+        unit: 'cm',
+        labels: [
+          { at: 'r', text: String(radius) },
+          { at: 'h', text: String(height) },
+        ],
+      },
+      answer,
+      feedback: {
+        correct: `$V = \\pi r^2 h = \\pi \\times ${radius}^2 \\times ${height} = ${answer}\\pi$ cubic centimeters.`,
+        wrong: 'Compute $r^2 h$ to find the coefficient of $\\pi$.',
+        hint: 'For a cylinder, $V = \\pi r^2 h$; the coefficient of $\\pi$ is $r^2 h$.',
+      },
+    };
+    return { step, params: { radius, height }, basePrompt, answer };
+  },
+);
+
+const s3ConeVolume = make(
+  {
+    formatId: 's3-cone-volume',
+    lessonId: S3,
+    reskinnable: false,
+    sourceStepId: 'q2-cone-volume',
+    label: 'Volume of a cone',
+  },
+  (rng) => {
+    const { r: radius, h: height } = pick(CONE_VOLUME_CONFIGS, rng);
+    const answer = (radius * radius * height) / 3;
+    const basePrompt = `A cone has radius ${radius} cm and height ${height} cm. Its volume is how many cubic centimeters of pi? (Give the whole number multiplied by pi.)`;
+    const step: LessonStep = {
+      id: 'review-s3-cone-volume',
+      type: 'solid-volume',
+      prompt: basePrompt,
+      solid: {
+        kind: 'cone',
+        radius,
+        height,
+        unit: 'cm',
+        labels: [
+          { at: 'r', text: String(radius) },
+          { at: 'h', text: String(height) },
+        ],
+      },
+      answer,
+      feedback: {
+        correct: `$V = \\frac{1}{3}\\pi r^2 h = \\frac{1}{3}\\pi \\times ${radius}^2 \\times ${height} = ${answer}\\pi$ cubic centimeters.`,
+        wrong: 'Compute $\\frac{r^2 h}{3}$ to find the coefficient of $\\pi$.',
+        hint: 'For a cone, $V = \\frac{1}{3}\\pi r^2 h$; the coefficient of $\\pi$ is $\\frac{r^2 h}{3}$.',
+      },
+    };
+    return { step, params: { radius, height }, basePrompt, answer };
+  },
+);
+
+const s3Sphere = make(
+  {
+    formatId: 's3-sphere',
+    lessonId: S3,
+    reskinnable: false,
+    sourceStepId: 'q3-sphere',
+    label: 'Volume of a sphere',
+  },
+  (rng) => {
+    const radius = pick(SPHERE_VOLUME_RADII, rng);
+    const answer = (4 * radius * radius * radius) / 3;
+    const basePrompt = `A sphere has radius ${radius} cm. Its volume is how many cubic centimeters of pi? (Give the whole number multiplied by pi.)`;
+    const step: LessonStep = {
+      id: 'review-s3-sphere',
+      type: 'solid-volume',
+      prompt: basePrompt,
+      solid: {
+        kind: 'sphere',
+        radius,
+        unit: 'cm',
+        labels: [{ at: 'r', text: String(radius) }],
+      },
+      answer,
+      feedback: {
+        correct: `$V = \\frac{4}{3}\\pi r^3 = \\frac{4}{3}\\pi \\times ${radius}^3 = ${answer}\\pi$ cubic centimeters.`,
+        wrong: 'Compute $\\frac{4 r^3}{3}$ to find the coefficient of $\\pi$.',
+        hint: 'For a sphere, $V = \\frac{4}{3}\\pi r^3$; the coefficient of $\\pi$ is $\\frac{4 r^3}{3}$.',
+      },
+    };
+    return { step, params: { radius }, basePrompt, answer };
+  },
+);
+
+const s3ConeRadius = make(
+  {
+    formatId: 's3-cone-radius',
+    lessonId: S3,
+    reskinnable: false,
+    sourceStepId: 'q4-cone-radius-volume',
+    label: 'Cone radius from a slice',
+  },
+  (rng) => {
+    const [a, b, c] = pick(PYTHAGOREAN_TRIPLES, rng);
+    const radius = a;
+    const height = b;
+    const slant = c;
+    const basePrompt = `A cone has height ${height} cm and slant height ${slant} cm. Slice it to reveal the right triangle, then find the radius of its circular base.`;
+    const step: LessonStep = {
+      id: 'review-s3-cone-radius',
+      type: 'cone-radius-slice',
+      prompt: basePrompt,
+      solid: {
+        kind: 'cone',
+        height,
+        slant,
+        unit: 'cm',
+        labels: [
+          { at: 'r', text: '?' },
+          { at: 'h', text: String(height) },
+          { at: 'l', text: String(slant) },
+        ],
+      },
+      answer: radius,
+      feedback: {
+        correct: `$r = \\sqrt{l^2 - h^2} = \\sqrt{${slant}^2 - ${height}^2} = ${radius}$ cm.`,
+        wrong: 'Use $r = \\sqrt{l^2 - h^2}$ with the slant height and the height.',
+        hint: 'The slice exposes a right triangle, so $r^2 + h^2 = l^2$; solve for $r$.',
+      },
+    };
+    return { step, params: { height, slant }, basePrompt, answer: radius };
+  },
+);
+
 export const REVIEW_FORMATS: QuestionFormat[] = [
   rtHypotenuse,
   rtArea,
@@ -647,6 +1115,18 @@ export const REVIEW_FORMATS: QuestionFormat[] = [
   transformDilate,
   csSideLength,
   csScaleRatio,
+  alVerticalAngles,
+  alLinearPair,
+  alCorresponding,
+  alMissingAngle,
+  taExteriorSum,
+  taRemoteInterior,
+  taParallelTriangle,
+  taParallelTriangleX,
+  s3CylinderVolume,
+  s3ConeVolume,
+  s3Sphere,
+  s3ConeRadius,
 ];
 
 /**

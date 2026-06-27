@@ -91,27 +91,25 @@ export const rightTrianglesLesson: Lesson = {
     {
       id: 'q1-hypotenuse',
       type: 'numeric',
-      prompt: 'Use $a^2 + b^2 = c^2$ to find the hypotenuse.',
+      prompt: 'Find the length of the hypotenuse.',
       triangle: { legs: [5, 12] },
       answer: 13,
       feedback: {
         correct: '$5^2 + 12^2 = 25 + 144 = 169 = 13^2$',
         wrong: 'Square each leg, add them, then take the square root.',
-        hint: 'Square both legs, add them, then take the square root of that sum.',
+        hint: 'Use $a^2 + b^2 = c^2$: square both legs, add them, then take the square root of that sum.',
       },
     },
     {
       id: 'q2-area',
       type: 'formula-compute',
-      formula:
-        'For a right triangle, the two legs serve as the base and height. $\\text{Area} = \\frac{1}{2} \\times \\text{leg}_1 \\times \\text{leg}_2$',
       prompt: 'What is the area of this right triangle?',
       triangle: { legs: [6, 8], hypotenuse: 10 },
       answer: 24,
       feedback: {
         correct: '$\\frac{1}{2} \\times 6 \\times 8 = 24$',
         wrong: 'Multiply the two legs, then divide by 2.',
-        hint: 'A triangle is half of the rectangle with the same base and height.',
+        hint: 'For a right triangle the two legs are the base and height, so $\\text{Area} = \\frac{1}{2} \\times \\text{leg}_1 \\times \\text{leg}_2$.',
       },
     },
     {

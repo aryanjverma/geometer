@@ -34,6 +34,22 @@ export function rankEntries(entries: LeaderboardEntry[]): RankedEntry[] {
     }));
 }
 
+/**
+ * Find where a given user stands among ranked (streak > 0) entries.
+ * Returns the user's 1-based rank and the total number of ranked entries,
+ * or null when the uid is missing/empty or the user is not ranked.
+ */
+export function leaderboardStanding(
+  entries: LeaderboardEntry[],
+  uid: string | null | undefined,
+): { rank: number; total: number } | null {
+  if (!uid) return null;
+  const ranked = rankEntries(entries);
+  const found = ranked.find((entry) => entry.uid === uid);
+  if (!found) return null;
+  return { rank: found.rank, total: ranked.length };
+}
+
 function leaderboardDoc(uid: string) {
   return doc(db, 'leaderboard', uid);
 }

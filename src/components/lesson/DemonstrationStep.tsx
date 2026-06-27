@@ -4,6 +4,11 @@ import { StaticTriangle } from './StaticTriangle';
 import { GeneralTriangle } from './GeneralTriangle';
 import { ShearTriangle } from './ShearTriangle';
 import { WhyHalfParallelogram } from './WhyHalfParallelogram';
+import { SlideAnglesProof } from './SlideAnglesProof';
+import { ExteriorAngleProof } from './ExteriorAngleProof';
+import { ParallelLinesFigure } from './ParallelLinesFigure';
+import { SliceCone } from './SliceCone';
+import { Solid3D } from './Solid3D';
 import { StaticGrid, gridShapes } from './StaticGrid';
 import { MathText } from '@/components/MathText';
 
@@ -21,6 +26,25 @@ export function DemonstrationStep({ step, onCorrect }: DemonstrationStepProps) {
   const triangle = step.triangle;
 
   const renderVisual = () => {
+    if (demo?.interactive === 'slide-angles') {
+      return <SlideAnglesProof angle={step.angleFigure?.baseAngle} />;
+    }
+    if (demo?.interactive === 'exterior-angle') {
+      return <ExteriorAngleProof />;
+    }
+    if (demo?.interactive === 'slice-cone') {
+      return (
+        <SliceCone
+          radius={step.solid?.radius}
+          height={step.solid?.height ?? 8}
+          slant={step.solid?.slant ?? 10}
+          revealRadius
+        />
+      );
+    }
+    if (step.solid) {
+      return <Solid3D figure={step.solid} />;
+    }
     if (step.grid) {
       return <StaticGrid {...step.grid} shapes={gridShapes(step.grid)} />;
     }
@@ -59,6 +83,9 @@ export function DemonstrationStep({ step, onCorrect }: DemonstrationStepProps) {
           showAltitude
         />
       );
+    }
+    if (step.angleFigure) {
+      return <ParallelLinesFigure figure={step.angleFigure} />;
     }
     return null;
   };

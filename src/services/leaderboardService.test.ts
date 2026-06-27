@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rankEntries } from './leaderboardService';
+import { leaderboardStanding, rankEntries } from './leaderboardService';
 import type { LeaderboardEntry } from '@/types/progress';
 
 function entry(overrides: Partial<LeaderboardEntry> & { uid: string }): LeaderboardEntry {
@@ -76,6 +76,52 @@ describe('rankEntries', () => {
     ];
     const snapshot = entries.map((e) => ({ ...e }));
     rankEntries(entries);
+    expect(entries).toEqual(snapshot);
+  });
+});
+
+describe('leaderboardStanding', () => {
+  const rankedTrio = () => [
+    entry({ uid: 'a', displayName: 'Alice', streak: 10 }),
+    entry({ uid: 'b', displayName: 'Bob', streak: 7 }),
+    entry({ uid: 'c', displayName: 'Cara', streak: 3 }),
+  ];
+
+  it('returns null for a null uid', () => {
+    expect(leaderboardStanding(rankedTrio(), null)).toBeNull();
+  });
+
+  it('returns null for an undefined uid', () => {
+    expect(leaderboardStanding(rankedTrio(), undefined)).toBeNull();
+  });
+
+  it('returns null for an empty-string uid', () => {
+    expect(leaderboardStanding(rankedTrio(), '')).toBeNull();
+  });
+
+  it('returns null when the user has a streak of 0 (excluded from ranking)', () => {
+    const entries = [
+      entry({ uid: 'a', displayName: 'Alice', streak: 10 }),
+      entry({ uid: 'z', displayName: 'Zed', streak: 0 }),
+    ];
+    expect(leaderboardStanding(entries, 'z')).toBeNull();
+  });
+
+  it('returns null when the user is absent from the list', () => {
+    expect(leaderboardStanding(rankedTrio(), 'missing')).toBeNull();
+  });
+
+  it('returns the correct 1-based rank and total for a ranked user', () => {
+    // Ranking by streak desc: a (10), b (7), c (3). Middle one is b -> rank 2.
+    expect(leaderboardStanding(rankedTrio(), 'b')).toEqual({ rank: 2, total: 3 });
+    expect(leaderboardStanding(rankedTrio(), 'a')).toEqual({ rank: 1, total: 3 });
+    expect(leaderboardStanding(rankedTrio(), 'c')).toEqual({ rank: 3, total: 3 });
+  });
+
+  it('does not mutate the input array', () => {
+    const entries = rankedTrio();
+    const snapshot = entries.map((e) => ({ ...e }));
+    leaderboardStanding(entries, 'b');
     expect(entries).toEqual(snapshot);
   });
 });

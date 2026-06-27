@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { LessonCard } from '@/components/dashboard/LessonCard';
 import { MasteryStats } from '@/components/dashboard/MasteryStats';
 import { ReviewSessionCard } from '@/components/dashboard/ReviewSessionCard';
@@ -7,7 +8,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/contexts/ProgressContext';
 import { getLessonButtonState, getProgressPercent } from '@/services/progressService';
 import { lessonConceptMasteries } from '@/services/masteryService';
+import { leaderboardStanding, subscribeLeaderboard } from '@/services/leaderboardService';
 import { effectiveStreak, todayString } from '@/services/streakService';
+import type { LeaderboardEntry } from '@/types/progress';
 
 function firstName(name: string | null | undefined): string {
   return name?.trim().split(/\s+/)[0] || 'there';
@@ -19,6 +22,13 @@ export function DashboardPage() {
   const percent = getProgressPercent(progress, LESSONS.map((l) => l.lessonId));
   const name = firstName(profile?.displayName ?? user?.displayName);
   const streak = effectiveStreak(progress.streak, progress.lastActivityDate, todayString());
+
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  useEffect(() => {
+    const unsub = subscribeLeaderboard(setLeaderboard, () => setLeaderboard([]));
+    return unsub;
+  }, []);
+  const standing = leaderboardStanding(leaderboard, user?.uid);
 
   if (loading) {
     return (
@@ -36,7 +46,12 @@ export function DashboardPage() {
         </p>
       </header>
 
-      <MasteryStats conceptMastery={conceptMastery} streak={streak} />
+      <MasteryStats
+        conceptMastery={conceptMastery}
+        streak={streak}
+        rank={standing?.rank ?? null}
+        totalRanked={standing?.total}
+      />
 
       <div className="review-row">
         <ReviewSessionCard progress={progress} />

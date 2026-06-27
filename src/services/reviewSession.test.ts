@@ -58,6 +58,9 @@ describe('isReviewUnlocked / completedInScopeLessons', () => {
       'distance-coordinate-plane',
       'transformations',
       'congruence-similarity',
+      'angles-lines',
+      'triangle-angles',
+      'solids-3d',
     ]);
   });
 });

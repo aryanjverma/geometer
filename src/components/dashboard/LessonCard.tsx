@@ -43,15 +43,20 @@ export function LessonCard({
     { 'need-review': 0, learning: 0, mastered: 0 } as Record<MasteryLevel, number>,
   );
 
-  const showConcepts = !locked && concepts.length > 0;
+  const hasConcepts = concepts.length > 0;
 
   return (
     <article className={`lesson-card ${locked ? 'lesson-card-locked' : ''}`}>
-      <h2>{title}</h2>
-      <p className="muted lesson-card-desc">{description}</p>
+      <div className="lesson-card-body">
+        <h2>{title}</h2>
 
-      {showConcepts && (
-        <div className="concept-overview">
+        {locked && (
+          <span className="lesson-locked-badge">
+            <span aria-hidden="true">🔒</span> Locked
+          </span>
+        )}
+
+        {hasConcepts ? (
           <ul className="concept-summary">
             {SUMMARY.filter(({ level }) => counts[level] > 0).map(({ level, short }) => (
               <li key={level} className={`concept-count mastery-${level}`}>
@@ -59,33 +64,25 @@ export function LessonCard({
               </li>
             ))}
           </ul>
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm concept-view-btn"
-            onClick={() => setOpen(true)}
-            aria-haspopup="dialog"
-            aria-expanded={open}
-          >
-            View concepts
-          </button>
-        </div>
-      )}
+        ) : (
+          <p className="concept-summary-empty muted">No concepts tracked yet</p>
+        )}
+      </div>
 
-      {locked ? (
-        <button type="button" className="btn btn-lesson btn-locked" disabled aria-disabled="true">
-          🔒 Locked
-        </button>
-      ) : (
-        <Link
-          to={`/lesson/${lessonId}`}
-          className={`btn btn-lesson btn-${buttonState.toLowerCase()}`}
-        >
-          {buttonState}
-        </Link>
-      )}
+      <button
+        type="button"
+        className={`btn btn-secondary btn-sm lesson-open-btn${locked ? ' lesson-open-btn-locked' : ''}`}
+        onClick={() => setOpen(true)}
+        aria-haspopup="dialog"
+        aria-expanded={open}
+      >
+        View lesson
+      </button>
 
-      {showConcepts && (
-        <Modal open={open} onClose={() => setOpen(false)} title={`${title} — concepts`}>
+      <Modal open={open} onClose={() => setOpen(false)} title={title}>
+        <p className="muted lesson-card-desc">{description}</p>
+
+        {hasConcepts && (
           <ul className="concept-chips">
             {concepts.map(({ concept, level }) => (
               <li key={concept.conceptId} className="concept-chip">
@@ -96,8 +93,26 @@ export function LessonCard({
               </li>
             ))}
           </ul>
-        </Modal>
-      )}
+        )}
+
+        {locked ? (
+          <button
+            type="button"
+            className="btn btn-lesson btn-locked"
+            disabled
+            aria-disabled="true"
+          >
+            🔒 Locked
+          </button>
+        ) : (
+          <Link
+            to={`/lesson/${lessonId}`}
+            className={`btn btn-lesson btn-${buttonState.toLowerCase()}`}
+          >
+            {buttonState}
+          </Link>
+        )}
+      </Modal>
     </article>
   );
 }

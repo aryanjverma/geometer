@@ -1,7 +1,6 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { getLessonMeta } from '@/content/lessons';
-import { getFormatForStep } from '@/content/reviewFormats';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProgress } from '@/contexts/ProgressContext';
 import { getLessonProgress, isLessonLocked } from '@/services/progressService';
@@ -44,16 +43,8 @@ export function LessonView() {
   const step = steps[currentIndex];
   const isLast = currentIndex === steps.length - 1;
 
-  // For "You do" steps that have a generator, render a fresh random-number
-  // version. Memoized so the numbers stay stable while the learner is on the
-  // step, and regenerate on the next visit (the component remounts per index).
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const renderStep = useMemo(() => {
-    const fmt = getFormatForStep(lessonId, step.id);
-    if (!fmt) return step;
-    const generated = fmt.generate();
-    return { ...generated.step, formula: step.formula ?? generated.step.formula };
-  }, [lessonId, step.id, currentIndex]);
+  // "You do" steps render exactly as authored in the lesson content.
+  const renderStep = step;
   const percent = finishing
     ? 100
     : Math.round((currentIndex / steps.length) * 100);

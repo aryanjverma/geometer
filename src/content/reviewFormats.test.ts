@@ -27,6 +27,9 @@ const IN_SCOPE = [
   'distance-coordinate-plane',
   'transformations',
   'congruence-similarity',
+  'angles-lines',
+  'triangle-angles',
+  'solids-3d',
 ];
 
 /** The ground-truth final answer the learner must type, by step shape. */
@@ -156,6 +159,59 @@ const verifiers: Record<string, (q: GeneratedQuestion) => void> = {
     expect(Number.isInteger(q.answer)).toBe(true);
     expect(q.answer).toBe(large / small);
   },
+  'al-vertical-angles': (q) => {
+    const { given } = q.params;
+    expect(q.answer).toBe(given);
+  },
+  'al-linear-pair': (q) => {
+    const { given } = q.params;
+    expect(q.answer).toBe(180 - given);
+  },
+  'al-corresponding-angle': (q) => {
+    const { given } = q.params;
+    expect(q.answer).toBe(given);
+  },
+  'al-missing-angle': (q) => {
+    const { given } = q.params;
+    expect(q.answer).toBe(180 - given);
+  },
+  'ta-exterior-sum': (q) => {
+    const { a, b } = q.params;
+    expect(q.answer).toBe(a + b);
+  },
+  'ta-remote-interior': (q) => {
+    const { ext, b } = q.params;
+    expect(q.answer).toBe(ext - b);
+    expect(q.answer).toBeGreaterThan(0);
+  },
+  'ta-parallel-triangle': (q) => {
+    const { a, b } = q.params;
+    expect(q.answer).toBe(180 - a - b);
+    expect(q.answer).toBeGreaterThan(0);
+  },
+  'ta-parallel-triangle-x': (q) => {
+    const { ext, b } = q.params;
+    expect(q.answer).toBe(ext - b);
+    expect(q.answer).toBeGreaterThan(0);
+  },
+  's3-cylinder-volume': (q) => {
+    const { radius, height } = q.params;
+    expect(q.answer).toBe(radius * radius * height);
+  },
+  's3-cone-volume': (q) => {
+    const { radius, height } = q.params;
+    expect(Number.isInteger((radius * radius * height) / 3)).toBe(true);
+    expect(q.answer).toBe((radius * radius * height) / 3);
+  },
+  's3-sphere': (q) => {
+    const { radius } = q.params;
+    expect(Number.isInteger((4 * radius * radius * radius) / 3)).toBe(true);
+    expect(q.answer).toBe((4 * radius * radius * radius) / 3);
+  },
+  's3-cone-radius': (q) => {
+    const { height, slant } = q.params;
+    expect(q.answer * q.answer + height * height).toBe(slant * slant);
+  },
 };
 
 const EXPECTED_FORMAT_IDS = [
@@ -173,6 +229,18 @@ const EXPECTED_FORMAT_IDS = [
   'transform-dilate',
   'cs-side-length',
   'cs-scale-ratio',
+  'al-vertical-angles',
+  'al-linear-pair',
+  'al-corresponding-angle',
+  'al-missing-angle',
+  'ta-exterior-sum',
+  'ta-remote-interior',
+  'ta-parallel-triangle',
+  'ta-parallel-triangle-x',
+  's3-cylinder-volume',
+  's3-cone-volume',
+  's3-sphere',
+  's3-cone-radius',
 ];
 
 describe('REVIEW_FORMATS catalog', () => {
@@ -299,6 +367,24 @@ describe('YOU_DO_STEPS registry', () => {
       'q5-side-length',
       'q6-scale-ratio',
     ]);
+    expect(YOU_DO_STEPS['angles-lines']).toEqual([
+      'q1-vertical-angles',
+      'q2-linear-pair',
+      'q3-corresponding-angle',
+      'q4-missing-angle',
+    ]);
+    expect(YOU_DO_STEPS['triangle-angles']).toEqual([
+      'q1-exterior-sum',
+      'q2-remote-interior',
+      'q3-parallel-triangle',
+      'q4-parallel-triangle-x',
+    ]);
+    expect(YOU_DO_STEPS['solids-3d']).toEqual([
+      'q1-cylinder-volume',
+      'q2-cone-volume',
+      'q3-sphere',
+      'q4-cone-radius-volume',
+    ]);
   });
 });
 
@@ -318,6 +404,18 @@ describe('getFormatForStep', () => {
     ['transformations', 'q8-dilate-point', 'transform-dilate'],
     ['congruence-similarity', 'q5-side-length', 'cs-side-length'],
     ['congruence-similarity', 'q6-scale-ratio', 'cs-scale-ratio'],
+    ['angles-lines', 'q1-vertical-angles', 'al-vertical-angles'],
+    ['angles-lines', 'q2-linear-pair', 'al-linear-pair'],
+    ['angles-lines', 'q3-corresponding-angle', 'al-corresponding-angle'],
+    ['angles-lines', 'q4-missing-angle', 'al-missing-angle'],
+    ['triangle-angles', 'q1-exterior-sum', 'ta-exterior-sum'],
+    ['triangle-angles', 'q2-remote-interior', 'ta-remote-interior'],
+    ['triangle-angles', 'q3-parallel-triangle', 'ta-parallel-triangle'],
+    ['triangle-angles', 'q4-parallel-triangle-x', 'ta-parallel-triangle-x'],
+    ['solids-3d', 'q1-cylinder-volume', 's3-cylinder-volume'],
+    ['solids-3d', 'q2-cone-volume', 's3-cone-volume'],
+    ['solids-3d', 'q3-sphere', 's3-sphere'],
+    ['solids-3d', 'q4-cone-radius-volume', 's3-cone-radius'],
   ];
 
   it('returns the matching format for every covered You-do step', () => {

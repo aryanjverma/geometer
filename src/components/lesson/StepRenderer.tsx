@@ -14,6 +14,10 @@ import { TransformStep } from './TransformStep';
 import { ShapeMatchStep } from './ShapeMatchStep';
 import { GridCheckStep } from './GridCheckStep';
 import { StaticGrid, gridShapes } from './StaticGrid';
+import { ParallelLinesFigure } from './ParallelLinesFigure';
+import { TriangleAngleFigure } from './TriangleAngleFigure';
+import { Solid3D } from './Solid3D';
+import { SliceCone } from './SliceCone';
 import { MathText } from '@/components/MathText';
 
 interface FeedbackState {
@@ -542,6 +546,185 @@ export function StepRenderer({ step, stepIndex, onCorrect, onAttempt }: StepRend
                 : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
             }}
           />
+          {feedback && <AnswerFeedback {...feedback} />}
+        </div>
+      </div>
+    );
+  }
+
+  if (step.type === 'find-angle' && step.angleFigure) {
+    return (
+      <div className="step-area">
+        {celebrate && <Confetti />}
+        <div className="question-box">
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
+          <ParallelLinesFigure figure={step.angleFigure} />
+        </div>
+        <div className="answer-box">
+          <NumericInput
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
+                ? finishStep(step.feedback?.correct ?? 'Correct!')
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
+          />
+          {feedback && <AnswerFeedback {...feedback} />}
+        </div>
+      </div>
+    );
+  }
+
+  if (step.type === 'triangle-angle' && step.angleFigure) {
+    return (
+      <div className="step-area">
+        {celebrate && <Confetti />}
+        <div className="question-box">
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
+          <TriangleAngleFigure
+            figure={step.angleFigure}
+            reveal={revealed}
+            revealValue={step.answer}
+          />
+        </div>
+        <div className="answer-box">
+          <NumericInput
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
+                ? finishStep(step.feedback?.correct ?? 'Correct!')
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
+          />
+          {feedback && <AnswerFeedback {...feedback} />}
+        </div>
+      </div>
+    );
+  }
+
+  if (step.type === 'solid-volume' && step.solid) {
+    return (
+      <div className="step-area">
+        {celebrate && <Confetti />}
+        <div className="question-box">
+          {step.formula && (
+            <p className="formula-box">
+              <MathText>{step.formula}</MathText>
+            </p>
+          )}
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
+          <Solid3D figure={step.solid} />
+        </div>
+        <div className="answer-box">
+          <NumericInput
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
+                ? finishStep(step.feedback?.correct ?? 'Correct!')
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
+          />
+          {feedback && <AnswerFeedback {...feedback} />}
+        </div>
+      </div>
+    );
+  }
+
+  if (step.type === 'cone-radius-slice' && step.solid) {
+    const { height = 8, slant = 10, radius } = step.solid;
+    return (
+      <div className="step-area">
+        {celebrate && <Confetti />}
+        <div className="question-box">
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
+          <SliceCone
+            height={height}
+            slant={slant}
+            radius={radius}
+            revealRadius={revealed}
+            onSplit={setUnfolded}
+          />
+        </div>
+        <div className="answer-box">
+          <NumericInput
+            disabled={!unfolded}
+            onSubmit={(value) => {
+              onAttempt?.(value === step.answer, value);
+              return value === step.answer
+                ? finishStep(step.feedback?.correct ?? 'Correct!')
+                : handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+            }}
+          />
+          {!unfolded && (
+            <p className="muted hint-text">Slice the cone first to reveal the right triangle.</p>
+          )}
+          {feedback && <AnswerFeedback {...feedback} />}
+        </div>
+      </div>
+    );
+  }
+
+  if (step.type === 'cone-radius-volume' && step.solid) {
+    const { height = 8, slant = 10, radius } = step.solid;
+    return (
+      <div className="step-area">
+        {celebrate && <Confetti />}
+        <div className="question-box">
+          <p className="step-prompt"><MathText>{step.prompt}</MathText></p>
+          <SliceCone
+            height={height}
+            slant={slant}
+            radius={radius}
+            revealRadius={partADone}
+            onSplit={setUnfolded}
+          />
+        </div>
+        <div className="answer-box">
+          {!partADone ? (
+            <>
+              <p className="step-prompt">
+                <MathText>{'Step 1 \u2014 find the radius of the circular opening.'}</MathText>
+              </p>
+              <NumericInput
+                key="radius"
+                disabled={!unfolded}
+                onSubmit={(value) => {
+                  if (value === step.answer) {
+                    setPartADone(true);
+                    setFeedback(null);
+                    setWrongAttempts(0);
+                    setCelebrate(true);
+                    setTimeout(() => setCelebrate(false), 1000);
+                    return true;
+                  }
+                  return handleWrong(step.feedback?.wrong ?? 'Try again.', step.feedback?.hint);
+                }}
+              />
+              {!unfolded && (
+                <p className="muted hint-text">Slice the cone first to reveal the right triangle.</p>
+              )}
+            </>
+          ) : (
+            <>
+              <p className="step-prompt">
+                <MathText>
+                  {'Step 2 \u2014 now find the cone volume as a whole-number coefficient of $\\pi$.'}
+                </MathText>
+              </p>
+              <NumericInput
+                key="volume"
+                onSubmit={(value) => {
+                  onAttempt?.(value === step.volumeAnswer, value);
+                  return value === step.volumeAnswer
+                    ? finishStep(step.feedback?.correct ?? 'Correct!')
+                    : handleWrong(
+                        'Compute $\\frac{r^2 h}{3}$ with the radius you just found.',
+                        'For a cone, $V = \\frac{1}{3}\\pi r^2 h$; the coefficient of $\\pi$ is $\\frac{r^2 h}{3}$.',
+                      );
+                }}
+              />
+            </>
+          )}
           {feedback && <AnswerFeedback {...feedback} />}
         </div>
       </div>

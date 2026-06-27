@@ -63,6 +63,12 @@ const steps: AuthoredStep[] = [
     },
   },
   {
+    id: 'transition-wedo',
+    type: 'transition',
+    prompt: "Now let's test a pair together.",
+    transition: { emoji: '\u{1F60A}', cta: "Let's do it" },
+  },
+  {
     id: 'guided-congruence',
     type: 'congruence-guided',
     tag: 'We do',

@@ -18,6 +18,9 @@ export const IN_SCOPE_LESSONS: string[] = [
   'distance-coordinate-plane',
   'transformations',
   'congruence-similarity',
+  'angles-lines',
+  'triangle-angles',
+  'solids-3d',
 ];
 
 /** In-scope lessons the learner has completed, in `IN_SCOPE_LESSONS` order. */

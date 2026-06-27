@@ -11,6 +11,7 @@ import type {
 const EXPECTED_STEPS: Array<{ id: string; type: string }> = [
   { id: 'intro', type: 'transition' },
   { id: 'demo-translate', type: 'transform-demo' },
+  { id: 'transition-wedo', type: 'transition' },
   { id: 'guided-translate', type: 'transform-guided' },
   { id: 'demo-reflect', type: 'transform-demo' },
   { id: 'guided-reflect', type: 'transform-guided' },

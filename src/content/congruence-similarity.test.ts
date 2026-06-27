@@ -109,6 +109,7 @@ describe('congruence-similarity lesson', () => {
     const expected: Array<{ id: string; type: string }> = [
       { id: 'intro', type: 'transition' },
       { id: 'demo-congruence', type: 'congruence-demo' },
+      { id: 'transition-wedo', type: 'transition' },
       { id: 'guided-congruence', type: 'congruence-guided' },
       { id: 'demo-similarity', type: 'similarity-demo' },
       { id: 'guided-similarity', type: 'similarity-guided' },

@@ -235,7 +235,7 @@ export const distanceLesson: Lesson = {
           id: 'is-right',
           kind: 'choice',
           prompt:
-            'A triangle is right when $a^2 + b^2 = c^2$ (the two shorter sides squared add up to the longest side squared). Does $15^2 + 20^2 = 25^2$? Is this a right triangle?',
+            'A triangle is right when the two shorter sides squared add up to the longest side squared. Is this a right triangle?',
           choices: [
             { id: 'yes', label: 'Yes, it is a right triangle' },
             { id: 'no', label: 'No, it is not' },
@@ -245,7 +245,7 @@ export const distanceLesson: Lesson = {
             correct:
               '$15^2 + 20^2 = 225 + 400 = 625 = 25^2$. Since $a^2 + b^2 = c^2$, it is a right triangle.',
             wrong: 'Check the two shorter sides against the longest: does $15^2 + 20^2$ equal $25^2$?',
-            hint: 'Square the two shorter sides and add them, then compare that total to the longest side squared \u2014 equality means it is a right triangle.',
+            hint: 'Use $a^2 + b^2 = c^2$: square the two shorter sides and add them, then compare that total to the longest side squared \u2014 equality means it is a right triangle.',
           },
         },
       ],
