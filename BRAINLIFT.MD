@@ -17,10 +17,10 @@ This brainlift is meant to detail how AI-enhanced learning strategies can be use
 ### Out of Scope
 
 - Building, training, or researching the underlying AI/LLM models themselves. This brainlift consumes existing foundation models as a tool; it is not about advancing core machine learning architectures.
-
 - Replacing human teachers, tutors, or formal schooling entirely. The focus is on augmenting and accelerating self-directed learning, not eliminating the human elements of education.
-
 - Learning domains outside of foundational mathematics. While the principles generalize, the concrete application here is geometry and adjacent math concepts, not language learning, soft skills, or unrelated subjects.
+
+
 
 ## DOK 4: Spiky Points of View (SPOVs)
 
@@ -28,8 +28,11 @@ This brainlift is meant to detail how AI-enhanced learning strategies can be use
   - *Elaboration:* AI is obviously very limited right now, considering how much it needs to do correctly in order to ensure learning (giving the right hints, being paired with other engagement mechanisms, and being checked against ground-truth metrics), but AI has capabilities that humans will simply never have. AI can process data at incredible speeds and use that data to power learning. For example, chat history can be used to adapt to different users' learning speeds instantly, which is a capability that human tutors won't be able to match. AI can tap into all the learning science mechanisms like spaced repetition, adaptive learning, micro-learning modules, and interleaving at a precision and accuracy that humans can't. Additionally, its speed will let it instantly create new questions, design new interactive learning material, and give feedback on assignments. Humans can't beat the speed and memory of AI, but as of right now, AI can't fully tap into that advantage due to the limitations of its current implementations. Within the next 10 years, I think AI tutors will become far more prevalent and, for many learners, will replace the human tutor entirely.
 - **Spiky POV 2:** Independent learning is a terrible idea.
   - *Elaboration:* Students without direction have no direction (antanaclasis). Students need some sort of instructor to tell them what to do and guide them along the journey, even if an independent learning system does the actual teaching. They need a framework to understand where to go; otherwise they may be overwhelmed by the options and not know which one to pick. Sure, the journey should be different for different people, but that doesn't mean we shouldn't give students a tour guide. Students need a specific path, otherwise they may not attain all the necessary information they need to move on to the next level. This is why there needs to be a person, or maybe even an AI agent, that decides for them based on their learning status.
-
-
+- **Spiky POV 3:** AI needs to be in schools.
+  - *Elaboration:* Many students, parents, teachers, and people in general believe that AI should be completely banned from schools. I think this is a terrible idea for 3 main reasons:
+    - **Banning AI will not prevent its usage and likely increase it.** When schools ban video games, students always find an unblocked website where they can bypass the rule. Sometimes, the ban actually leads to increased usage of video games due to something called the Prohibition Paradox, which is where banning something leads to it being more coveted due to the "forbidden fruit" effect. Banning items can also lead to black markets that can make the initial item banned worse; for example, maybe students started off playing Cool Math Games on their Chromebooks, but after the ban, they may download Fortnite on it because since video games are illegal, they may as well play the most fun one. The same thing is sure to happen with AI; students will find a way to use AI tools in undetectable ways that may be even more destructive than prior to the ban. The better option is regulation of AI and instruction on how to use it properly. AI chatbots should be banned due to lack of guardrails, and schools should implement their own personal agents that are ordered towards teaching rather than cognitive offload. This includes educational AI not directly giving answers, getting information directly from the school's source material, and ensuring conversations are targeted towards education as opposed to other topics.
+    - **AI is incredibly effective at teaching students when done right.** As I highlighted in SPOV 1, I think AI tutors will replace human tutors because of their memory and speed. AI tutors in schools will help give one-on-one support to students that teachers can't, because they can manage hundreds of students at once while remembering every word of their past conversations, all while being able to create targeted questions and grade papers instantly. AI's ability to personalize is powerful and should not be overlooked; it is an incredibly powerful skill that can save instructors lots of time while benefitting students greatly.
+    - **Students need to learn AI to survive.** AI needs to be taught to students if they want to survive in a world run by AI. A student who is behind, with the right AI tools, can surpass students who are ahead of him with ease. We need to make sure every student understands how to write a precise prompt, how to fact-check a chatbot's output, how to use AI tooling to optimize their workflows, and very importantly, how to use AI ethically. Students with an education on how to use AI properly will learn and build 10 times faster. If we teach students how to leverage AI, they will be prepared for their careers and their daily lives as well. A ban would significantly hinder their growth, and put them behind all their peers. For this reason, I think it's important that schools spend at least an hour a week teaching students about when and how to use AI the right way.
 
 ## Experts
 
@@ -42,6 +45,8 @@ This section is a curated list of the leading thinkers, researchers, and practit
 - **Why Follow:** His work proves that high-quality instruction can be delivered to millions through software, and his framing of AI as "a tool to amplify human capability" directly informs this BrainLift's purpose of building AI integrations that make learning easier without removing the cognitive work that produces real understanding.
 - **Where:** [deeplearning.ai](https://www.deeplearning.ai/), [X (@AndrewYNg)](https://x.com/AndrewYNg), [Google Scholar](https://scholar.google.com/citations?user=mG4imMEAAAAJ)
 
+
+
 ### Expert 2
 
 - **Who:** Sal Khan
@@ -49,12 +54,16 @@ This section is a curated list of the leading thinkers, researchers, and practit
 - **Why Follow:** Khanmigo is the clearest real-world implementation of a Socratic AI tutor that refuses to hand over answers, which is direct evidence for the DOK 3 insight that AI must guide rather than tell in order to preserve durable learning. His mastery-learning model also grounds the case for adaptive, periodically-assessed learning paths.
 - **Where:** [Khan Academy](https://www.khanacademy.org/), book *Brave New Words* (2024), [X (@salkhanacademy)](https://x.com/salkhanacademy)
 
+
+
 ### Expert 3
 
 - **Who:** Barbara Oakley
 - **Focus:** The neuroscience and practice of learning. Creator of "Learning How to Learn," one of the most popular online courses ever, and author of works on chunking, focused vs. diffuse thinking, and spaced repetition as concrete, teachable study techniques.
 - **Why Follow:** Her popularization of spaced repetition and chunking provides the cognitive-science foundation for the spaced-repetition and microlearning branches of the Knowledge Tree, translating dense research into the practical mechanics this app needs to implement.
 - **Where:** [barbaraoakley.com](https://barbaraoakley.com/), [Learning How to Learn (Coursera)](https://www.coursera.org/learn/learning-how-to-learn), [X (@barbaraoakley)](https://x.com/barbaraoakley)
+
+
 
 ### Expert 4
 
@@ -105,15 +114,15 @@ The Knowledge Tree is organized from broad categories to specific facts. It dire
 
 *DOK 1 - Facts:*
 
-- This systematic meta-analysis aggregated data from 21,500 active learners across digital platforms.
-- The traditional modular learning control group achieved a lower long-term knowledge retention rate of 43.20%.
-- The calculated effect size showed a massive positive statistical divergence in retention compared to self-directed reading.
+- This systematic review and meta-analysis included 13 studies with 21,415 learners across medical education settings.
+- Spaced repetition produced a statistically significant benefit over standard study techniques (standardized mean difference = 0.78; 95% CI 0.56–0.99; p < 0.0001).
+- Interventions included digital flashcards, email-delivered MCQs, and spaced classroom quizzes.
 
 *DOK 2 - Summary:*
 
-- Data from tens of thousands of students shows how effective spaced repetition is.
+- A large meta-analysis confirms spaced repetition reliably outperforms conventional study methods in medical education.
 
-[Link to source](https://www.researchgate.net/publication/394819697_Microlearning_in_Mathematics_Education_Impacts_on_Student_Retention_and_Cognitive_Load)
+[Link to source](https://doi.org/10.1111/tct.70353)
 
 #### Subcategory 1.2: Microlearning & Cognitive Load Architecture
 
@@ -292,13 +301,39 @@ The Knowledge Tree is organized from broad categories to specific facts. It dire
 
 The research above points toward AI that *augments* deterministic instruction without ever owning the math. That principle is the line every feature decision was measured against: the numbers and the correct answer must come from deterministic, verifiable code, and AI may only add narrative or directional guidance that is checked against those known numbers before it reaches the learner. The table below names what was shipped, what was deliberately rejected, and why.
 
+### Mastery Quizzes and the Mastery Test (Phase 3)
+
+Phase 1 shipped the teaching arc (I do / We do / You do with progressive hints). Phase 2 added Daily Review — interleaved, spaced retrieval with optional AI reskin and Ask Geometer. Both phases worked, but forward progress still unlocked on mere lesson completion: there was no graded check on fresh numbers before advancing, and concept mastery in Daily Review did not gate the curriculum. That conflated *performance during practice* with *durable understanding*, exactly the trap Bjork warns about: current performance is a poor proxy for what a learner can do on a novel problem later.
+
+Phase 3 replaces that implicit loop with two explicit, graded assessments — a **Mastery Quiz** after every lesson and a comprehensive **Mastery Test** at the end of the course.
+
+**Why this design**
+
+- **Mastery learning needs a clear gate before the next concept.** Sal Khan's mastery model and the adaptive-learning literature both argue that progress should follow demonstrated competence, not seat time. Passing a short quiz on *fresh numbers* is an un-farmable signal: you cannot memorize one lesson's answer key and slip through.
+- **Retrieval beats recognition.** Re-running a lesson lets the learner recognize the same figures and givens. A quiz that regenerates numbers via the same deterministic generators forces them to pull the method from memory — the core mechanism of retrieval practice.
+- **Blocked practice for first learning, interleaving for consolidation.** When first acquiring a skill, practice on one concept at a time is appropriate, so each Mastery Quiz stays isolated to a single lesson's concepts. Interleaving — mixing concepts so the learner must *choose* the method — is most valuable after initial acquisition, so it lives in Daily Review (ongoing) and the Mastery Test (the course finale). The test deliberately interleaves one question per concept across all eight lessons via round-robin ordering.
+- **Desirable difficulty means fading support, not removing it during learning.** Lessons keep demos, guided steps, progressive hints, and Ask Geometer. Assessments drop all of that: no scaffolding, no hints, no AI, no per-question feedback during the attempt. Support belongs in teaching; proof belongs in assessment.
+- **Explanatory feedback only teaches if it is read.** Lessons and Daily Review now require an explicit Continue tap after a correct answer (replacing a 1.2s auto-advance that learners literally never saw). Quizzes and the test defer *all* feedback — right, wrong, and explanations — to a scroll-through review screen at the end, so the attempt itself stays pure retrieval and the learner chooses when to study what they missed.
+
+**How it was implemented**
+
+- **Generation (`masteryQuizService.ts`).** Both assessments reuse the Phase 2 `REVIEW_FORMATS` catalog: each format owns a deterministic generator and a ground-truth integer answer, so the existing `StepRenderer` grades them with no new UI and no AI. `buildMasteryQuiz(lessonId)` emits one fresh question per concept in that lesson only. `buildMasteryTest()` emits one question per concept across the whole course, interleaved by lesson via `interleaveByLesson`. Every retake calls the generators again, so numbers are always new.
+- **Pass criteria.** A quiz or test passes only when every concept was answered correctly on the first submission — no wrong attempt and no hint (`isSessionQuestionCorrect` over per-question flags). In assessment mode each question is single-shot: a wrong answer advances immediately and marks the concept incorrect. An empty result set never passes. This is stricter than the Daily Review's last-2 correctness rule and is intentional: the quiz is the unlock gate, not a practice surface.
+- **Progress gates (`progressService.ts`).** Completing a lesson unlocks its Mastery Quiz (`isMasteryQuizUnlocked`). Passing sets a sticky `masteryPassed` flag that unlocks the next lesson (`isLessonLocked` / `isPrereqSatisfied`). That gate is one-way: once a lesson opens it never re-locks, even if Daily Review later un-masters a concept. A passing quiz also records one clean attempt per concept; under the last-2 rule, concept chips may still read "Learning" until Daily Review or a retake adds a second correct. Display chips ("Mastered" / "Review recommended") derive from live concept history and can move up or down independently of the sticky unlock gate.
+- **Assessment mode (`StepRenderer` + `useAssessmentGuard`).** Quiz and test pages render through the shared step renderer with `assessmentMode`: hints suppressed, Ask Geometer hidden, single submission per question, immediate advance with no confetti or inline explanation. A rules-agreement intro arms a one-sitting lock — tab switch, minimize, or window blur voids the attempt (nothing saved; restart with fresh numbers). Results land on an `AssessmentReview` screen showing per-concept ✓/✗, the learner's answer, the correct answer, and the explanation.
+- **AI stays out.** Mastery Quizzes and the Mastery Test are 100% deterministic and AI-free. They prove the learner can do the math without reskinning or tutoring — consistent with the BrainLift principle that AI augments teaching but never owns correctness or the mastery signal.
+
+Together, the three surfaces split responsibilities cleanly: **lessons** teach with scaffolding, **Daily Review** interleaves and spaces retrieval over time (and can nudge concept mastery up or down), and **Mastery Quizzes / Test** provide the hard, number-fresh proof that unlocks forward progress and marks course completion.
+
 ### Shipped
 
 | Feature | Decision | Why |
 | --- | --- | --- |
 | AI word-problem reskin | Shipped | AI rewrites a deterministic `GeneratedQuestion` into an interest-themed word problem, but never invents math. A number-preservation validator (`validateReskin`) confirms every given parameter appears as a standalone integer and the answer does not appear at all; any failure falls back to the plain template. Engagement gain with zero risk of a wrong or leaked answer. |
 | Socratic hints | Shipped | Hints give a directional nudge toward the method, never the result. A hint validator (`validateHint`) — the same primitive extended — rejects any hint that states the answer, introduces a number outside the givens (a computed intermediate), or includes an explicit formula/equation; it retries once, then falls back to a hand-written hint. Supports productive struggle instead of answer-giving. |
-| Mastery-driven lesson selection | Shipped | A rule-based mastery layer (spaced-repetition-style) decides which concepts surface for review. Determinism keeps the learning path explainable and reproducible; AI never decides what to teach, only how to phrase it. |
+| Mastery-weighted Daily Review selection | Shipped | A rule-based mastery layer (spaced-repetition-style) decides which concepts surface for review and can raise or lower per-concept mastery after each attempt. Determinism keeps the learning path explainable and reproducible; AI never decides what to teach, only how to phrase it. |
+| Per-lesson Mastery Quiz | Shipped | After completing a lesson, a short isolated quiz (one fresh-number question per concept) is the strict unlock gate to the next lesson. Reuses deterministic `REVIEW_FORMATS` generators; passes only on all-first-try correctness; AI-free assessment mode with deferred end-of-quiz review. Replaces completion-only unlock as the forward-progress signal. |
+| Comprehensive Mastery Test | Shipped | Unlocked after all eight quizzes pass. One fresh-number question per concept across the course, interleaved by lesson. Same assessment rules as quizzes (no scaffolding, one-sitting lock, deferred feedback). Marks course-level mastery via `masteryTestPassed`. |
 | Explicit AI off-switch | Shipped | An Account-page toggle (persisted to the profile) disables all reskin and hint AI calls. It makes the no-AI gate verifiable in-app — plain templates and hand-written hints, with no network call attempted — rather than only observable by forcing a failure. |
 
 ### Considered and Rejected
